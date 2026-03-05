@@ -1,0 +1,112 @@
+# =========================
+
+# Python
+
+# =========================
+
+**pycache**/
+*.py[cod]
+*$py.class
+*.so
+
+# Distribution / packaging
+
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Virtual environments
+
+venv/
+env/
+ENV/
+.venv/
+
+# =========================
+
+# FastAPI / Uvicorn
+
+# =========================
+
+*.log
+logs/
+
+# =========================
+
+# Telethon sessions
+
+# =========================
+
+*.session
+*.session-journal
+
+# =========================
+
+# Environment variables
+
+# =========================
+
+.env
+
+# =========================
+
+# Firebase
+
+# =========================
+
+firebase-service-account.json
+serviceAccountKey.json
+*.firebase.json
+showheap-service.json
+
+# =========================
+
+# IDEs
+
+# =========================
+
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# =========================
+
+# OS files
+
+# =========================
+
+.DS_Store
+Thumbs.db
+
+# =========================
+
+# Testing
+
+# =========================
+
+.coverage
+.pytest_cache/
+htmlcov/
+
+# =========================
+
+# Docker
+
+# =========================
+
+*.pid
+*.seed
+docker-compose.override.yml
+
+# =========================
+
+# Misc
+
+# =========================
+
+*.sqlite3
+*.db
+*.bak
+*.tmp
