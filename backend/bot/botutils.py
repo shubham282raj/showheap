@@ -1,13 +1,12 @@
 import env
 from telethon import events, TelegramClient, Button
-import botclient
+from . import client
 from utils import pretty_format
 import utils
 
 STREAM_BASE_URL = env.getenv("STREAM_BASE_URL")
 HASH_LENGTH = int(env.getenv("HASH_LENGTH"))
 WF_LOG_CHANNEL_ID = int(env.getenv("WF_LOG_CHANNEL_ID"))
-client = botclient.client
 
 
 class TGLogger:

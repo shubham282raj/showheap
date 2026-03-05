@@ -1,32 +1,33 @@
-from fastapi import FastAPI, HTTPException, Query, Response, Request
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import RedirectResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
-import bothandles  # important
-import botclient
+import bot
+import bot.bothandles as bothandles  # register
 import env
 import httpx
 import tmdb
+import logging
+
+# logging
+logging.basicConfig(
+    format="[%(levelname) %(asctime)s] %(name)s: %(message)s", level=logging.WARNING
+)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # from firebase import db
-
-    # doc = await db.collection("content").document("tv_1396").get()
-    # doc = doc.to_dict()
-    # print(doc)
 
     print("🚀 Starting Telethon bot...")
 
-    await botclient.startbot()
+    await bot.startbot()
 
     print("🤖 Telethon bot started")
 
     yield
 
     print("🛑 Stopping Telethon bot...")
-    await botclient.client.disconnect()
+    await bot.client.disconnect()
 
 
 app = FastAPI(lifespan=lifespan)

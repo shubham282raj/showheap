@@ -1,6 +1,6 @@
 import llm
 import tmdb
-import botutils
+import bot.botutils as botutils
 
 
 async def fetchMediaDetails(metadata: dict, tglogger: botutils.TGLogger = None):

@@ -1,10 +1,11 @@
 import env
 from telethon import events, Button
-from hash import pack_file
 import workflow
-from botclient import client
+from .hash import pack_file
+from . import client
 import firebase
-import botutils, utils
+from . import botutils
+import utils
 
 
 FILE_LOG_CHANNEL_ID = int(env.getenv("FILE_LOG_CHANNEL_ID"))
