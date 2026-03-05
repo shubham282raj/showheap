@@ -1,8 +1,8 @@
 import env
-from telethon import events, TelegramClient, Button
 from . import client
 from utils import pretty_format
-import utils
+import hashlib
+
 
 STREAM_BASE_URL = env.getenv("STREAM_BASE_URL")
 HASH_LENGTH = int(env.getenv("HASH_LENGTH"))
@@ -11,15 +11,17 @@ WF_LOG_CHANNEL_ID = int(env.getenv("WF_LOG_CHANNEL_ID"))
 
 class TGLogger:
 
-    def __init__(self, data, chatID: int = WF_LOG_CHANNEL_ID, parse_mode=None):
+    def __init__(self, data="", chatID: int = WF_LOG_CHANNEL_ID, parse_mode=None):
         self.chatID = chatID
         self.msgID = None
         self.parse_mode = parse_mode
+        self.text = ""
         self.update(data, markdown=True)
 
     def update(self, data, markdown: bool = True):
-        print(data)
-        self.text = pretty_format(data, markdown=markdown)
+        if data:
+            print(data)
+            self.text = pretty_format(data, markdown=markdown)
 
     def append(self, data, delimiter: str = "\n\n", markdown: bool = True):
         print(data)
@@ -32,6 +34,7 @@ class TGLogger:
         if not self.text:
             return
         try:
+            self.text.strip()
             if self.msgID:
                 msg = await client.edit_message(
                     self.chatID, self.msgID, self.text, parse_mode=self.parse_mode
@@ -62,34 +65,6 @@ def getStreamingLink(metadata: dict):
     return f"{STREAM_BASE_URL}/stream/{metadata.get('message_id')}/?hash={metadata.get('file_hash', '*'*20)[:HASH_LENGTH]}"
 
 
-async def replySuccessFileWF(event, content, metadata):
-
-    caption = f"""
-🎬 <b>{content.get('title') or content.get('name')}</b>
-🎭 <b>Type:</b> {metadata['media_type'].title()}
-
-📂 <b>File:</b> {metadata['file_name']}
-💾 <b>Size:</b> {utils.format_size(metadata['file_size'])}
-"""
-
-    poster_url = f"https://image.tmdb.org/t/p/w500{content['poster_path']}"
-    streaming_link = getStreamingLink(metadata)
-
-    await event.reply(
-        caption,
-        file=poster_url,
-        parse_mode="html",
-        buttons=[
-            [Button.url("▶ Stream / Download", streaming_link)],
-            [
-                Button.url(
-                    "TMDB",
-                    f"https://www.themoviedb.org/{metadata.get("media_type")}/{metadata.get("tmdb_id")}",
-                ),
-                Button.url(
-                    "ShowHeap",
-                    f"https://www.themoviedb.org/content/{metadata.get("media_type")}/{metadata.get("tmdb_id")}",
-                ),
-            ],
-        ],
-    )
+def pack_file(file_name: str, file_size: int, mime_type: str, file_id: str) -> str:
+    data = file_name + str(file_size) + mime_type + str(file_id)
+    return hashlib.md5(data.encode("utf-8")).hexdigest()

@@ -58,4 +58,4 @@ async def fetchMediaDetails(metadata: dict, tglogger: botutils.TGLogger = None):
 
     tglogger.append("WorkFlow Successful: Fetch Media Details", markdown=False)
 
-    return content_details
+    return content_details, metadata
