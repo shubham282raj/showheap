@@ -44,12 +44,14 @@ class ToShowDBWF:
                 parse_mode="md",
             )
 
+            # fetch media details via workflow
             metadata["description"] = self.event.message.text
             content, metadata = await workflow.fetchMediaDetails(
                 metadata, self.tglogger
             )
             metadata.pop("description", None)
 
+            # save on firebase
             await firebase.showDB.save_content(content, metadata)
             self.tglogger.append("Saved to Firebase Successfully", markdown=False)
 

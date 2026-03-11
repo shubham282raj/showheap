@@ -1,4 +1,4 @@
-import llm
+import llm.prompts as prompts
 import tmdb
 import bot.botutils as botutils
 
@@ -11,7 +11,7 @@ async def fetchMediaDetails(metadata: dict, tglogger: botutils.TGLogger = None):
     tglogger.append({"File Name": metadata["file_name"]})
 
     # LLM: Extract content name
-    extracted_name = await llm.extract_movie_name(
+    extracted_name = await prompts.extract_movie_name(
         metadata["file_name"], metadata["description"]
     )
     tglogger.append({"Extracted Name": f"'{extracted_name}'"})
@@ -24,7 +24,7 @@ async def fetchMediaDetails(metadata: dict, tglogger: botutils.TGLogger = None):
     reduced_candidates = tmdb.clean_multi_search_query(candidates)
 
     # LLM: Extract tmdbID of the most relevant show
-    tmdbID = await llm.get_tmdb_id(
+    tmdbID = await prompts.get_tmdb_id(
         metadata["file_name"], extracted_name, reduced_candidates
     )
     tmdbID = int(tmdbID)
@@ -51,7 +51,7 @@ async def fetchMediaDetails(metadata: dict, tglogger: botutils.TGLogger = None):
     # LLM: Extract Season / Episode Numbers
     if content_type == "tv":
         season_info = tmdb.extract_season_info(content_details)
-        episode_code = await llm.extract_episode(metadata["file_name"], season_info)
+        episode_code = await prompts.extract_episode(metadata["file_name"], season_info)
         metadata["episode_code"] = episode_code
 
         tglogger.append({"Episode Code Extracted": f"'{episode_code}'"}, delimiter="\n")

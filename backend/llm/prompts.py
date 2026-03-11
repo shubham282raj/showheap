@@ -1,42 +1,4 @@
-from google import genai
-import env
-
-client = genai.Client(api_key=env.getenv("GEMINI_API_KEY"))
-
-
-async def generate_response(prompt, error: Exception | None = None):
-    models = [
-        "gemma-3-27b-it",
-        "gemma-3-12b-it",
-        "gemma-3-12b-it",  # twice
-        "gemma-3-4b-it",
-        "gemma-3-4b-it",  # twice
-        "gemma-3-1b-it",
-    ]
-
-    last_error = None
-
-    for model in models:
-        try:
-            print(f"Trying model: {model}")
-
-            response = await client.aio.models.generate_content(
-                model=model,
-                contents=prompt,
-            )
-
-            return response
-
-        except Exception as gemini_error:
-            print(f"{model} FAILED:", gemini_error)
-            last_error = gemini_error
-            continue
-
-    # If all models fail
-    if error:
-        raise error from last_error
-
-    raise last_error
+from . import dispatcher
 
 
 async def extract_movie_name(file_name, description):
@@ -71,10 +33,9 @@ Return only the title. No punctuation, no quotes, no explanation.
 Answer:
 """
 
-    response = await generate_response(
-        prompt,
-        error=Exception("LLM Exception: Failed to extract movie name from 'file_name'"),
-    )
+    response = await dispatcher.submit(prompt)
+
+    # Exception("LLM Exception: Failed to extract movie name from 'file_name'")
 
     return response.text.strip()
 
@@ -102,12 +63,9 @@ async def get_tmdb_id(filename: str, show_name: str, candidates: list):
 
     Answer:
     """
-    response = await generate_response(
-        prompt,
-        error=Exception(
-            "LLM Exception: Faild to get 'tmdb_id' from 'file_name', 'show_name' and 'candidates'"
-        ),
-    )
+    response = await dispatcher.submit(prompt)
+
+    # Exception("LLM Exception: Faild to get 'tmdb_id' from 'file_name', 'show_name' and 'candidates'")
 
     return response.text.strip()
 
@@ -184,11 +142,8 @@ Output rules:
 Answer:
 """
 
-    response = await generate_response(
-        prompt,
-        error=Exception(
-            "LLM Exception: Failed to extract Season/Episode Data from 'file_name' and 'season_info'"
-        ),
-    )
+    response = await dispatcher.submit(prompt)
+
+    # Exception("LLM Exception: Failed to extract Season/Episode Data from 'file_name' and 'season_info'")
 
     return response.text.strip().upper()
