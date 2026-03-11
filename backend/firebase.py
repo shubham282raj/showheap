@@ -1,6 +1,7 @@
 import firebase_admin
 from firebase_admin import credentials, firestore_async
 from firebase_admin.firestore import SERVER_TIMESTAMP
+import logging
 
 cred = credentials.Certificate("showheap-service.json")
 firebase_admin.initialize_app(cred)
@@ -63,7 +64,7 @@ class showDB:
             doc = await db.collection("metadata").document(str(fileID)).get()
             return doc.to_dict() if doc.exists else None
         except Exception as e:
-            print(e)
+            logging.error(e)
             raise Exception(
                 "Firebase Error: Failed to get metadata from 'fileID' via 'getMetadata' function"
             )
@@ -76,7 +77,7 @@ class showDB:
             )
             return doc.to_dict() if doc.exists else None
         except Exception as e:
-            print(e)
+            logging.error(e)
             raise Exception(
                 "Firebase Error: Failed to get content from 'media_type' and 'tmdb_id' via 'getContent' function"
             )

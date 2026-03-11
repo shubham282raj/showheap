@@ -57,7 +57,7 @@ class Model:
                     seconds * (2 ** (self.backoff_attempts - 1)), MAX_BACKOFF_SECONDS
                 )
                 self.cooldown_until = time.monotonic() + backoff_sec
-            logging.info(
+            logging.warning(
                 "%s cooling down %.2fs (attempt %d)",
                 self.name,
                 backoff_sec,
@@ -116,7 +116,7 @@ class Dispatcher:
                     return  # graceful shutdown
 
                 prompt, fut = item
-                logging.info("Worker %d picked up a task.", number)
+                logging.debug("Worker %d picked up a task.", number)
                 try:
                     await self._process(prompt, fut)
                 except Exception as exc:
@@ -134,13 +134,10 @@ class Dispatcher:
         init_time = time.monotonic()
 
         while True:
-            tried_any = False
-
             for m in self.models:
                 if not await m.available():
                     continue
 
-                tried_any = True
                 logging.info("Trying model: %s", m.name)
 
                 try:
@@ -155,29 +152,25 @@ class Dispatcher:
                     return
 
                 except errors.ClientError as exc:
-                    logging.warning("%s client error: %s", m.name, exc)
+                    logging.warning("%s GEMINI CLIENT ERROR: %s", m.name, exc.message)
                     await m.apply_cooldown(
                         get_retry_delay(exc) or 5.0, cooldown_type="rate_limit"
                     )
                     query_meta["retries"] += 1
 
                 except errors.ServerError as exc:
-                    logging.warning("%s server error: %s", m.name, exc)
+                    logging.warning("%s GEMINI SERVER ERROR: %s", m.name, exc.message)
                     await m.apply_cooldown(5.0, cooldown_type="error")
                     query_meta["retries"] += 1
 
                 except Exception as exc:
-                    logging.warning("%s unexpected failure: %s", m.name, exc)
+                    logging.error("%s UNEXPECTED ERROR: %s", m.name, exc)
                     await m.apply_cooldown(5.0, cooldown_type="error")
                     query_meta["retries"] += 1
 
-            # ── sleep until the next model becomes available ─────────────────
+            # sleep until the next model becomes available
             waits = await asyncio.gather(*(m.wait_time() for m in self.models))
             sleep_for = max(min(waits), MIN_RETRY_SLEEP)
 
-            if not tried_any:
-                logging.info("All models cooling down. Sleeping %.2fs.", sleep_for)
-            else:
-                logging.info("Retrying after %.2fs.", sleep_for)
-
+            logging.warning("All models cooling down. Sleeping for %.2fs.", sleep_for)
             await asyncio.sleep(sleep_for)

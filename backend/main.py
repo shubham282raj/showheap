@@ -8,20 +8,21 @@ import env
 import httpx
 import tmdb
 import logger  # logger config
+import logging
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
 
-    print("🚀 Starting Telethon bot...")
+    logging.info("🚀 Starting Telethon bot...")
 
     await bot.startbot()
 
-    print("🤖 Telethon bot started")
+    logging.info("🤖 Telethon bot started")
 
     yield
 
-    print("🛑 Stopping Telethon bot...")
+    logging.info("🛑 Stopping Telethon bot...")
     await bot.client.disconnect()
 
 

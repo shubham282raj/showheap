@@ -2,6 +2,7 @@ import env
 from . import client
 from utils import pretty_format
 import hashlib
+import logging
 
 
 STREAM_BASE_URL = env.getenv("STREAM_BASE_URL")
@@ -20,11 +21,11 @@ class TGLogger:
 
     def update(self, data, markdown: bool = True):
         if data:
-            print(data)
+            logging.info(data)
             self.text = pretty_format(data, markdown=markdown)
 
     def append(self, data, delimiter: str = "\n\n", markdown: bool = True):
-        print(data)
+        logging.info(data)
         if not self.text:
             self.text = pretty_format(data, markdown=markdown)
         else:
@@ -47,7 +48,7 @@ class TGLogger:
                 self.msgID = msg.id
             return msg
         except Exception as e:
-            print("Error Committing Log Message")
+            logging.error("Error Committing Log Message")
 
 
 async def message_exists(chat_id: int, message_id: int) -> bool:
@@ -55,7 +56,7 @@ async def message_exists(chat_id: int, message_id: int) -> bool:
         msg = await client.get_messages(chat_id, ids=message_id)
         return bool(msg)
     except Exception as e:
-        print(e)
+        logging.error(e)
         raise Exception(
             "TG Error: Failed to check message existence via 'message_exists' function"
         )
