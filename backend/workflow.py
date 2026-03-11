@@ -11,25 +11,25 @@ async def fetchMediaDetails(metadata: dict, tglogger: botutils.TGLogger = None):
     tglogger.append({"File Name": metadata["file_name"]})
 
     # LLM: Extract content name
-    extracted_name = await prompts.extract_movie_name(
+    extracted_name, llm_logs = await prompts.extract_movie_name(
         metadata["file_name"], metadata["description"]
     )
-    tglogger.append({"Extracted Name": f"'{extracted_name}'"})
+    tglogger.append({"Extracted Name": f"'{extracted_name}'", "LLM Logs": llm_logs})
 
     # FETCH: Query tmdb contents using extracted name
     candidates = await tmdb.queryv3("search/multi", {"query": extracted_name})
     if not candidates.get("results"):
         raise Exception("Workflow Error: Found 0 results Extracted Name")
-    tglogger.append({"TMDB:": f"Found {len(candidates)} matches"}, delimiter="\n")
+    tglogger.append({"TMDB": f"Found {len(candidates)} matches"}, delimiter="\n")
     reduced_candidates = tmdb.clean_multi_search_query(candidates)
 
     # LLM: Extract tmdbID of the most relevant show
-    tmdbID = await prompts.get_tmdb_id(
+    tmdbID, llm_logs = await prompts.get_tmdb_id(
         metadata["file_name"], extracted_name, reduced_candidates
     )
     tmdbID = int(tmdbID)
     metadata["tmdb_id"] = tmdbID
-    tglogger.append({"TMDB ID": f"'{tmdbID}'"}, delimiter="\n")
+    tglogger.append({"TMDB ID": f"'{tmdbID}'", "LLM Logs": llm_logs}, delimiter="\n")
 
     # Filter content from the tmdb content query
     content_candidate = tmdb.filter_content(candidates, tmdbID)
@@ -51,10 +51,15 @@ async def fetchMediaDetails(metadata: dict, tglogger: botutils.TGLogger = None):
     # LLM: Extract Season / Episode Numbers
     if content_type == "tv":
         season_info = tmdb.extract_season_info(content_details)
-        episode_code = await prompts.extract_episode(metadata["file_name"], season_info)
+        episode_code, llm_logs = await prompts.extract_episode(
+            metadata["file_name"], season_info
+        )
         metadata["episode_code"] = episode_code
 
-        tglogger.append({"Episode Code Extracted": f"'{episode_code}'"}, delimiter="\n")
+        tglogger.append(
+            {"Episode Code Extracted": f"'{episode_code}'", "LLM Logs": llm_logs},
+            delimiter="\n",
+        )
 
     tglogger.append("WorkFlow Successful: Fetch Media Details", markdown=False)
 

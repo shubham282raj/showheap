@@ -33,11 +33,11 @@ Return only the title. No punctuation, no quotes, no explanation.
 Answer:
 """
 
-    response = await dispatcher.submit(prompt)
+    responsetxt, logs = await dispatcher.submit(prompt)
 
     # Exception("LLM Exception: Failed to extract movie name from 'file_name'")
 
-    return response.text.strip()
+    return responsetxt, logs
 
 
 async def get_tmdb_id(filename: str, show_name: str, candidates: list):
@@ -63,11 +63,11 @@ async def get_tmdb_id(filename: str, show_name: str, candidates: list):
 
     Answer:
     """
-    response = await dispatcher.submit(prompt)
+    responsetxt, logs = await dispatcher.submit(prompt)
 
     # Exception("LLM Exception: Faild to get 'tmdb_id' from 'file_name', 'show_name' and 'candidates'")
 
-    return response.text.strip()
+    return responsetxt, logs
 
 
 async def extract_episode(filename: str, season_info: dict):
@@ -142,8 +142,8 @@ Output rules:
 Answer:
 """
 
-    response = await dispatcher.submit(prompt)
+    responsetxt, logs = await dispatcher.submit(prompt)
 
     # Exception("LLM Exception: Failed to extract Season/Episode Data from 'file_name' and 'season_info'")
 
-    return response.text.strip().upper()
+    return responsetxt.upper(), logs

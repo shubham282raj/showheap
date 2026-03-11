@@ -13,7 +13,7 @@ async def __generate_response(model, prompt):
         contents=prompt,
     )
 
-    return response
+    return response.text.strip()
 
 
 models = [
@@ -23,13 +23,13 @@ models = [
     # Model("gemini-2.5-flash-lite", 10, __generate_response),
     Model("gemma-3-27b-it", 30, __generate_response),
     Model("gemma-3-12b-it", 30, __generate_response),
-    Model("gemma-3-4b-it", 30, __generate_response),
-    Model("gemma-3-2b-it", 30, __generate_response),
-    Model("gemma-3-1b-it", 30, __generate_response),
+    # Model("gemma-3-4b-it", 30, __generate_response),
+    # Model("gemma-3-2b-it", 30, __generate_response),
+    # Model("gemma-3-1b-it", 30, __generate_response),
 ]
 
 # dispatcher instanace
 dispatcher = Dispatcher(models)
 
-# single dispatcher worker
-asyncio.create_task(dispatcher.worker())
+for i in range(5):
+    asyncio.create_task(dispatcher.worker(i))
