@@ -56,6 +56,7 @@ class ToShowDBWF:
             self.tglogger.append("Saved to Firebase Successfully", markdown=False)
 
             await self.replySuccessFileWF(content, metadata)
+            await self.init_reply.delete()
 
         except Exception as e:
             shorterror = utils.shortenError(e)
@@ -64,9 +65,9 @@ class ToShowDBWF:
                 f"Workflow Failed\n\n{shorterror}\n\nYou can still use the streaming link",
                 buttons=[Button.url("▶ Stream", botutils.getStreamingLink(metadata))],
             )
-        finally:
             if self.init_reply:
                 await self.init_reply.delete()
+        finally:
             await self.tglogger.commit()
 
     def getFileMetadata(self):
@@ -122,7 +123,7 @@ class ToShowDBWF:
 
         await self.event.reply(
             caption,
-            file=poster_url,
+            file=poster_url if content.get("poster_path") else None,
             parse_mode="html",
             buttons=[
                 [Button.url("▶ Stream / Download", streaming_link)],

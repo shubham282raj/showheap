@@ -7,12 +7,7 @@ import bot.bothandles as bothandles  # register
 import env
 import httpx
 import tmdb
-import logging
-
-# logging
-logging.basicConfig(
-    format="[%(levelname)s %(asctime)s] %(name)s: %(message)s", level=logging.WARNING
-)
+import logger  # logger config
 
 
 @asynccontextmanager

@@ -45,7 +45,7 @@ class showDB:
                 },
             )
         # TV
-        else:
+        elif metadata["media_type"] == "tv":
             batch.update(
                 content_ref,
                 {

@@ -40,7 +40,9 @@ Answer:
     return responsetxt, logs
 
 
-async def get_tmdb_id(filename: str, show_name: str, candidates: list):
+async def get_tmdb_id(
+    filename: str, show_name: str, description: str, candidates: list
+):
     prompt = f"""
     You are selecting the best matching TMDB entry.
 
@@ -50,12 +52,16 @@ async def get_tmdb_id(filename: str, show_name: str, candidates: list):
     Extracted Show Name:
     {show_name}
 
+    Description:
+    {description}
+
     Candidate Entries:
     {candidates}
 
     Rules:
-    - Pick the entry that best matches the show name and filename.
+    - Pick the entry that best matches the show name, filename, description.
     - Prefer exact title matches.
+    - Choose correctly between 'movie' and 'tv' media types
     - Ignore unrelated titles.
     - Return ONLY the numerical id.
     - Do not explain.
@@ -70,12 +76,15 @@ async def get_tmdb_id(filename: str, show_name: str, candidates: list):
     return responsetxt, logs
 
 
-async def extract_episode(filename: str, season_info: dict):
+async def extract_episode(filename: str, description: str, season_info: dict):
     prompt = f"""
 You are extracting season and episode information from a TV show filename.
 
 Filename:
 {filename}
+
+Description:
+{description}
 
 Show Information:
 {season_info}

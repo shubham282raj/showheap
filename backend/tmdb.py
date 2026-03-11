@@ -50,23 +50,28 @@ async def queryv3(full_path: str, query_params: dict | None = None):
         raise Exception(f"Invalid JSON returned:\n{response.text}")
 
 
-def clean_multi_search_query(candidates: str):
+def clean_multi_search_query(candidates_list: str):
     results = []
 
-    for item in candidates.get("results", []):
+    for item in candidates_list:
         title = item.get("title") or item.get("name")
         release_date = item.get("release_date") or item.get("first_air_date")
 
         if title:  # avoid empty entries
             results.append(
-                {"title": title, "id": item.get("id"), "release_date": release_date}
+                {
+                    "title": title,
+                    "id": item.get("id"),
+                    "release_date": release_date,
+                    "media_type": item.get("media_type"),
+                }
             )
 
     return results
 
 
-def filter_content(candidates: list, tmdbID: int):
-    for item in candidates.get("results", []):
+def filter_content(candidates_list: list, tmdbID: int):
+    for item in candidates_list:
         itemID = item.get("id")
         if itemID == tmdbID:
             return item
