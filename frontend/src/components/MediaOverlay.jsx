@@ -278,7 +278,7 @@ export default function MediaOverlay({
       {/* ── Fullscreen button ── */}
       <div
         className={`position-absolute p-3 media-overlay ${visible && playerState != "idle" ? "" : "hidden"}`}
-        style={{ right: "0px", top: "0px", zIndex: 20 }}
+        style={{ right: "0px", top: "0px", zIndex: 20, cursor: "pointer" }}
         onClick={(e) => {
           e.stopPropagation();
           toggleFullscreen();

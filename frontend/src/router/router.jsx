@@ -19,10 +19,10 @@ export const router = createBrowserRouter([
         path: "content/:media_type/:tmdb_id",
         element: <Content />,
       },
-      {
-        path: "content/:media_type/:tmdb_id/:file_id",
-        element: <Content />,
-      },
+      // {
+      //   path: "content/:media_type/:tmdb_id/:file_id",
+      //   element: <Content />,
+      // },
       {
         path: "watch/:media_type/:tmdb_id/:file_id",
         element: <Watch />,

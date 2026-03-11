@@ -2,7 +2,6 @@ import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { Container } from "react-bootstrap";
 import ContentHeader from "../components/ContentHeader";
-import FileMetadata from "../components/FileMetadata";
 import ListFileSection from "../components/ListFileSection";
 import { LoadingContainer } from "../components/Loader";
 import { getContent } from "../apis/firebase";
@@ -41,9 +40,7 @@ export default function Content() {
     <Container className="mt-4">
       <ContentHeader media_type={media_type} tmdb_id={tmdb_id} />
 
-      {file_id ? (
-        <FileMetadata file_id={file_id} />
-      ) : content.media_type == "tv" ? (
+      {content.media_type == "tv" ? (
         <ListFileSection fileGroup={content.files} />
       ) : (
         <ListFileSection fileGroup={{ Files: content.files }} />
