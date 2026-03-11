@@ -21,7 +21,7 @@ export default function Search() {
     return (
       <Container>
         <div className="text-center" style={{ lineHeight: "1.5rem" }}>
-          Database Search is fast and prefix based <br /> <br />
+          This uses prefix based search <br /> <br />
           For example
           <br />
           Query = "Break" <br />
@@ -34,7 +34,12 @@ export default function Search() {
 
   if (isLoading) return <LoadingContainer />;
 
-  if (isError) return <div>Error: {error.message}</div>;
+  if (isError)
+    return (
+      <Container>
+        <div className="text-center">Error: {error.message}</div>
+      </Container>
+    );
 
   return (
     <Container className="my-2">

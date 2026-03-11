@@ -15,14 +15,14 @@ export default function Home() {
   if (isLoading) return <LoadingContainer />;
 
   return (
-    <Container className="my-2">
-      <Row className="px-1">
+    <Container className="my-1">
+      <Row className="g-2">
         {data.pages.map((page) =>
           page.docs.map((doc) => {
             const content = doc.data();
 
             return (
-              <Col key={doc.id} xs={6} sm={6} md={4} lg={3} className="px-0">
+              <Col key={doc.id} xs={6} sm={6} md={4} lg={3} className="d-flex">
                 <ShowTile content={content} />
               </Col>
             );

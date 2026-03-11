@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Container, Card, Badge, Image } from "react-bootstrap";
 import { getContent } from "../apis/firebase";
 import { useParams } from "react-router-dom";
+import { getTmdbImageUrl } from "../utils/link";
 
 export default function ContentHeader() {
   const { media_type, tmdb_id } = useParams();
@@ -21,12 +22,10 @@ export default function ContentHeader() {
 
   if (isError) return <div>Error: {error.message}</div>;
 
-  const imageBase = "https://image.tmdb.org/t/p/original";
-
   return (
     <Card className="shadow position-relative text-white w-100 h-100 border-0 overflow-hidden user-select-none">
       <Card.Img
-        src={`${imageBase}${content.backdrop_path}`}
+        src={getTmdbImageUrl(content.backdrop_path)}
         className="object-fit-cover h-100 w-100"
         style={{ aspectRatio: 16 / 9 }}
       />
@@ -42,7 +41,7 @@ export default function ContentHeader() {
         <div className="w-100 h-100 m-0 d-flex justify-content-between align-items-end">
           <Container className="h-100 w-auto p-2 m-0">
             <Image
-              src={`${imageBase}${content.poster_path}`}
+              src={getTmdbImageUrl(content.poster_path)}
               className="h-100 w-auto p-0 rounded-2"
             ></Image>
           </Container>

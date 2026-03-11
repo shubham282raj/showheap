@@ -40,14 +40,17 @@ export default function FileMetadata(props) {
 
   return (
     <Container className="my-4">
-      <Card className="border-0 shadow-lg">
+      <Card
+        className="border-0 shadow-lg bg-white"
+        style={{ "--bs-bg-opacity": "0.03" }}
+      >
         <Button
-          className="p-0 border-0"
+          className="p-0 border-0 bg-transparent"
           onClick={() =>
             navigate(`/content/${data.media_type}/${data.tmdb_id}`)
           }
         >
-          <Card.Header className="bg-dark-subtle border-0">
+          <Card.Header className="border-0">
             <div className="d-flex align-items-center text-primary gap">
               <ChevronLeft className="" strokeWidth={2} />
               <div className="">

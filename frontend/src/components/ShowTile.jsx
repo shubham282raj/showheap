@@ -1,5 +1,6 @@
 import { Badge, Card } from "react-bootstrap";
 import { Link } from "react-router-dom";
+import { getTmdbImageUrl } from "../utils/link";
 
 export default function ShowTile({ content }) {
   const isTVShow = content.media_type == "tv";
@@ -17,18 +18,21 @@ export default function ShowTile({ content }) {
       className="text-decoration-none"
       to={`/content/${content.media_type}/${content.tmdb_id}`}
     >
-      <Card className="shadow-sm border-0 bg-dark-subtle mx-1 my-2">
+      <Card
+        className="shadow-sm border-0 bg-white h-100 w-100"
+        style={{ "--bs-bg-opacity": "0.03" }}
+      >
         <Card.Img
           variant="top"
-          src={`https://image.tmdb.org/t/p/w500${content.poster_path}`}
+          src={getTmdbImageUrl(content.poster_path)}
           alt={content.name}
           style={{ aspectRatio: 1 / 1.414, objectFit: "cover" }}
         />
 
         <Card.Body className="d-flex flex-column">
-          <Card.Title>{content.name}</Card.Title>
+          <Card.Title className="mb-auto">{content.name}</Card.Title>
 
-          <div className="mb-2">
+          <div className="d-flex my-2">
             <Badge
               bg={content.media_type == "tv" ? "success" : "danger"}
               className="me-2 text-uppercase"

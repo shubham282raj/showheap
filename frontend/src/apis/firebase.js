@@ -25,7 +25,7 @@ export const getMetadata = async (file_id) => {
   return snap.data();
 };
 
-export const fetchContent = async (lastVisibleDoc, PAGE_SIZE = 10) => {
+export const fetchContent = async (lastVisibleDoc, PAGE_SIZE = 12) => {
   let q;
 
   if (lastVisibleDoc) {

@@ -21,3 +21,7 @@ export const createIntentUrl = (url, packageName) => {
   console.log(link);
   return link;
 };
+
+export const getTmdbImageUrl = (image_path) => {
+  return `https://image.tmdb.org/t/p/w500${image_path}`;
+};

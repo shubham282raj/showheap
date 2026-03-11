@@ -1,6 +1,28 @@
 :root {
-  --bs-primary: #ffc107;
-  --bs-primary-rgb: 255, 193, 7;
+  --bs-primary: #4ade80;
+  --bs-primary-rgb: 74, 222, 128;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+}
+
+/* Firefox */
+html {
+  scrollbar-width: none;
+}
+
+/* IE / old Edge */
+body {
+  -ms-overflow-style: none;
+}
+
+/* Chrome / Safari / Edge */
+html::-webkit-scrollbar {
+  display: none;
 }
 
 .form-check-input:checked {

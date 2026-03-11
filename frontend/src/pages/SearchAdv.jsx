@@ -39,7 +39,12 @@ export default function SearchAdv() {
 
   if (isLoading) return <LoadingContainer />;
 
-  if (isError) return <div>Error: {error.message}</div>;
+  if (isError)
+    return (
+      <Container>
+        <div className="text-center">Error: {error.message}</div>
+      </Container>
+    );
 
   return (
     <Container className="my-2">
