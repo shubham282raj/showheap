@@ -77,7 +77,7 @@ export default function FileMetadata(props) {
                 onChange={() => {
                   localStorage.setItem(
                     "useproxy",
-                    localStorage.getItem("userproxy") == "true"
+                    localStorage.getItem("useproxy") == "true"
                       ? "false"
                       : "true",
                   );
@@ -93,7 +93,7 @@ export default function FileMetadata(props) {
 
                 {/* Android */}
                 <div className="d-flex flex-wrap gap-2 justify-content-center align-items-center">
-                  {isAndroid && (
+                  {/* {isAndroid && (
                     <StreamButton
                       icon={<SquarePlay />}
                       text={"MX Player"}
@@ -103,7 +103,7 @@ export default function FileMetadata(props) {
                         "com.mxtech.videoplayer.ad",
                       )}
                     />
-                  )}
+                  )} */}
                   {isAndroid && (
                     <StreamButton
                       icon={<TrafficCone />}
