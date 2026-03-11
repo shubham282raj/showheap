@@ -9,6 +9,7 @@ import {
   getDocs,
   getDoc,
   where,
+  getCountFromServer,
 } from "firebase/firestore";
 
 export const getContent = async (media_type, tmdb_id) => {
@@ -68,4 +69,12 @@ export const searchContentByName = async (name) => {
     id: doc.id,
     ...doc.data(),
   }));
+};
+
+export const getCollectionCounts = async (collections) => {
+  const snaps = await Promise.all(
+    collections.map((name) => getCountFromServer(collection(db, name))),
+  );
+
+  return snaps.map((snap) => snap.data().count);
 };

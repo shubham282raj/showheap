@@ -2,17 +2,32 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { Container, Row, Col, Button, Spinner } from "react-bootstrap";
 import { LoadingContainer } from "../components/Loader";
 import ShowTile from "../components/ShowTile";
+import DBCount from "../components/DBCount";
 import { fetchContent } from "../apis/firebase";
 
 export default function Home() {
-  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useInfiniteQuery({
-      queryKey: ["fetchmovies"],
-      queryFn: async ({ pageParam }) => fetchContent(pageParam),
-      getNextPageParam: (lastPage) => lastPage.lastVisible ?? undefined,
-    });
+  const {
+    data,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isError,
+    error,
+  } = useInfiniteQuery({
+    queryKey: ["fetchmovies"],
+    queryFn: async ({ pageParam }) => fetchContent(pageParam),
+    getNextPageParam: (lastPage) => lastPage.lastVisible ?? undefined,
+  });
 
   if (isLoading) return <LoadingContainer />;
+
+  if (isError)
+    return (
+      <Container>
+        <div className="text-center">{error.message}</div>
+      </Container>
+    );
 
   return (
     <Container className="my-1">
@@ -29,6 +44,8 @@ export default function Home() {
           }),
         )}
       </Row>
+
+      <DBCount />
 
       {hasNextPage ? (
         <div className="text-center my-3">
