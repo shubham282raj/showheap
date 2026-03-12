@@ -1,7 +1,7 @@
 import BackgroundGrid from "../components/BackgroundGrid";
 import LogoText from "../components/LogoText";
 
-export default function MainSuspense() {
+export default function MainSuspense({ text }) {
   return (
     <>
       <BackgroundGrid />
@@ -85,13 +85,15 @@ export default function MainSuspense() {
               marginTop: "12px",
               fontSize: "0.65rem",
               letterSpacing: "0.4em",
+              lineHeight: 1,
               color: "rgba(74,222,128,0.4)",
               textTransform: "uppercase",
               animation: "fadeUp 0.8s 0.2s ease forwards",
               opacity: 0,
+              // height: "15px",
             }}
           >
-            loading
+            {text}
           </div>
 
           {/* Progress bar track */}

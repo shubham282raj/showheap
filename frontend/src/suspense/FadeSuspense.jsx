@@ -1,4 +1,10 @@
 import { Suspense, useState, useEffect, useRef } from "react";
+import {
+  subscribeSuspense,
+  getSuspenseState,
+  showSuspense,
+} from "./suspenseController";
+import MainSuspense from "./MainSuspense";
 
 function FadeOverlay({ children, show }) {
   const [mounted, setMounted] = useState(true);
@@ -7,6 +13,8 @@ function FadeOverlay({ children, show }) {
     if (!show) {
       const t = setTimeout(() => setMounted(false), 600);
       return () => clearTimeout(t);
+    } else {
+      setMounted(true);
     }
   }, [show]);
 
@@ -18,13 +26,17 @@ function FadeOverlay({ children, show }) {
         position: "fixed",
         inset: 0,
         display: "flex",
+        flexDirection: "column",
         justifyContent: "center",
         alignItems: "center",
+        gap: "20px",
         background: "black",
         transition: "opacity 0.6s ease",
         opacity: show ? 1 : 0,
         pointerEvents: "none",
         zIndex: 9999,
+        color: "white",
+        fontSize: "18px",
       }}
     >
       {children}
@@ -40,16 +52,14 @@ function SuspenseBridge({ onLoaded, children }) {
   return children;
 }
 
-export default function FadeSuspense({
-  children,
-  fallback,
-  minDuration = 1000,
-}) {
+export default function FadeSuspense({ children, minDuration = 100 }) {
   const [loaded, setLoaded] = useState(false);
+
+  const [forcedState, setForcedState] = useState(getSuspenseState());
+
   const timerDone = useRef(false);
   const contentReady = useRef(false);
 
-  // Try to resolve — only fires when both flags are true
   const tryResolve = () => {
     if (timerDone.current && contentReady.current) {
       setLoaded(true);
@@ -70,13 +80,21 @@ export default function FadeSuspense({
     tryResolve();
   };
 
+  useEffect(() => {
+    return subscribeSuspense(setForcedState);
+  }, []);
+
+  const showOverlay = !loaded || forcedState.visible;
+
   return (
     <>
       <Suspense fallback={null}>
         <SuspenseBridge onLoaded={handleLoaded}>{children}</SuspenseBridge>
       </Suspense>
 
-      <FadeOverlay show={!loaded}>{fallback}</FadeOverlay>
+      <FadeOverlay show={showOverlay}>
+        <MainSuspense text={forcedState.text} />
+      </FadeOverlay>
     </>
   );
 }

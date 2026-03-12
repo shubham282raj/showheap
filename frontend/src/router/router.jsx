@@ -5,6 +5,11 @@ import Content from "../pages/Content";
 import Search from "../pages/Search";
 import Watch from "../pages/Watch";
 import SearchAdv from "../pages/SearchAdv";
+import ProtectedRoute from "../components/ProtectedRoute";
+import Login from "../pages/Login";
+import Register from "../pages/Register";
+import PasswordReset from "../pages/PasswordReset";
+import Verification from "../pages/Verification";
 
 export const router = createBrowserRouter([
   {
@@ -12,28 +17,45 @@ export const router = createBrowserRouter([
     element: <App />,
     children: [
       {
-        index: true,
-        element: <Home />,
+        path: "login",
+        element: <Login />,
       },
       {
-        path: "content/:media_type/:tmdb_id",
-        element: <Content />,
-      },
-      // {
-      //   path: "content/:media_type/:tmdb_id/:file_id",
-      //   element: <Content />,
-      // },
-      {
-        path: "watch/:media_type/:tmdb_id/:file_id",
-        element: <Watch />,
+        path: "register",
+        element: <Register />,
       },
       {
-        path: "search",
-        element: <Search />,
+        path: "passwordreset",
+        element: <PasswordReset />,
       },
       {
-        path: "tmdbSearch",
-        element: <SearchAdv />,
+        path: "verification",
+        element: <Verification />,
+      },
+      {
+        element: <ProtectedRoute />,
+        children: [
+          {
+            index: true,
+            element: <Home />,
+          },
+          {
+            path: "content/:media_type/:tmdb_id",
+            element: <Content />,
+          },
+          {
+            path: "watch/:media_type/:tmdb_id/:file_id",
+            element: <Watch />,
+          },
+          {
+            path: "search",
+            element: <Search />,
+          },
+          {
+            path: "tmdbSearch",
+            element: <SearchAdv />,
+          },
+        ],
       },
     ],
   },

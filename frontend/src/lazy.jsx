@@ -3,6 +3,7 @@ import { router } from "./router/router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./index.css";
+import { AuthProvider } from "./context/AuthContext";
 
 export default function lazy() {
   const queryClient = new QueryClient({
@@ -21,7 +22,9 @@ export default function lazy() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
+      <AuthProvider>
+        <RouterProvider router={router} />
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

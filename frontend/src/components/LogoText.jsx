@@ -5,6 +5,7 @@ export default function LogoText(props) {
         fontSize: "clamp(2.5rem, 8vw, 5rem)",
         fontWeight: 900,
         letterSpacing: "0.25em",
+        lineHeight: 1,
         textTransform: "uppercase",
         color: "#fff",
         fontFamily: "'Courier New', 'Lucida Console', monospace",
