@@ -15,7 +15,13 @@ export default function Watch() {
     queryFn: () => getMetadata(file_id),
   });
 
-  if (isError) return <div>Error: {error.message}</div>;
+  if (isError)
+    return (
+      <Container>
+        {console.log(error)}
+        <div className="text-center">Error: {error.message}</div>
+      </Container>
+    );
 
   if (isSuccess && (data.media_type != media_type || data.tmdb_id != tmdb_id))
     return (

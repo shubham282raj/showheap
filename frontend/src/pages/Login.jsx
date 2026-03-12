@@ -2,18 +2,22 @@ import { useMutation } from "@tanstack/react-query";
 import { Card, Container, Spinner } from "react-bootstrap";
 import { signIn } from "../apis/auth";
 import toast from "react-hot-toast";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function Login() {
+  const navigate = useNavigate();
+
   const logInMutation = useMutation({
     mutationFn: signIn,
     onSuccess: () => {
       toast.success("Sign In Successful");
+      navigate("/");
     },
     onError: (e) => {
       toast.error(`Error: ${e.message}`);
     },
   });
+
   return (
     <Container className="d-flex justify-content-center align-items-center">
       <Card style={{ width: "400px" }} className="shadow-sm border-0 py-2">
@@ -26,7 +30,7 @@ export default function Login() {
               const email = e.target.email.value;
               const password = e.target.password.value;
               if (!logInMutation.isPending) {
-                logInMutation.mutate(email, password);
+                logInMutation.mutate({ email, password });
               }
             }}
             style={{}}

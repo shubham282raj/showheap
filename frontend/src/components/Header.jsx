@@ -1,11 +1,13 @@
 import { Link, useLocation } from "react-router-dom";
-import { Clapperboard, Search } from "lucide-react";
+import { Clapperboard, LogIn, LogOut, Search } from "lucide-react";
 import { Button, Container, Row } from "react-bootstrap";
 import SearchBar from "./SearchBar";
 import LogoText from "./LogoText";
+import { useAuth } from "../context/AuthContext";
 
 export default function Header() {
   const location = useLocation();
+  const { user } = useAuth();
 
   const isSearchRoute =
     location.pathname == "/search" || location.pathname == "/tmdbSearch";
@@ -22,27 +24,61 @@ export default function Header() {
               <Clapperboard className="text-primary" size={28} />
 
               <LogoText fontSize={"28px"} />
-              {/* <h4 className="m-0 text-primary" style={{ letterSpacing: "2px" }}>
-                ShowHeap
-              </h4> */}
             </div>
           </Link>
 
-          <Link
-            to="/search"
-            className="d-flex gap-2 align-items-center text-decoration-none"
-          >
-            <Button
-              style={{
-                visibility: isSearchRoute ? "hidden" : "visible",
-              }}
-              className="border-0"
-              variant="dark"
-            >
-              {/* <div>Search</div> */}
-              <Search strokeWidth={3} className="text-primary" />
-            </Button>
-          </Link>
+          <div className="d-flex gap-2">
+            {user ? (
+              <>
+                <Link
+                  to="/search"
+                  className="d-flex gap-2 align-items-center text-decoration-none"
+                  title="Search"
+                >
+                  <Button
+                    style={{
+                      visibility: isSearchRoute ? "hidden" : "visible",
+                    }}
+                    className="border-0"
+                    variant="dark"
+                  >
+                    <Search strokeWidth={3} className="text-primary" />
+                  </Button>
+                </Link>
+                <Link
+                  to="/logout"
+                  className="d-flex gap-2 align-items-center text-decoration-none"
+                  title="Log Out"
+                >
+                  <Button
+                    style={{
+                      visibility: isSearchRoute ? "hidden" : "visible",
+                    }}
+                    className="border-0"
+                    variant="dark"
+                  >
+                    <LogOut strokeWidth={3} className="text-primary" />
+                  </Button>
+                </Link>
+              </>
+            ) : (
+              <Link
+                to="/login"
+                className="d-flex gap-2 align-items-center text-decoration-none"
+                title="Log In"
+              >
+                <Button
+                  style={{
+                    visibility: isSearchRoute ? "hidden" : "visible",
+                  }}
+                  className="border-0"
+                  variant="dark"
+                >
+                  <LogIn strokeWidth={3} className="text-primary" />
+                </Button>
+              </Link>
+            )}
+          </div>
         </Container>
 
         <SearchBar visible={isSearchRoute} />

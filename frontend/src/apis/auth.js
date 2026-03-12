@@ -2,10 +2,11 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   sendPasswordResetEmail,
+  signOut,
 } from "firebase/auth";
 import { auth } from "../firebase";
 
-export async function signIn(email, password) {
+export async function signIn({ email, password }) {
   if (!email || !password) {
     throw new Error("Incomplete credentials");
   }
@@ -34,7 +35,22 @@ export async function signIn(email, password) {
   }
 }
 
-export async function register({ email, password }) {
+export async function signOutUser() {
+  try {
+    await signOut(auth);
+    return true;
+  } catch (error) {
+    const errors = {
+      "auth/network-request-failed":
+        "Network error. Check your internet connection",
+    };
+
+    const message = errors[error.code] || error.message || "Logout failed";
+    throw new Error(message);
+  }
+}
+
+export async function register({ name, email, password }) {
   if (!email || !password) throw new Error("Incomplete credentials");
 
   try {

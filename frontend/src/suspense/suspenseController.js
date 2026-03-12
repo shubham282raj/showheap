@@ -10,6 +10,7 @@ function notify() {
 }
 
 export function showSuspense(text = "loading") {
+  console.log("showing");
   state.visible += 1;
   state.text = text;
 
@@ -18,6 +19,7 @@ export function showSuspense(text = "loading") {
   let released = false;
 
   return () => {
+    console.log("hiding");
     if (released) return;
     released = true;
 

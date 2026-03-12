@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { auth } from "../firebase";
-import { onAuthStateChanged } from "firebase/auth";
+import { onIdTokenChanged } from "firebase/auth";
 import { showSuspense } from "../suspense/suspenseController";
 
 const AuthContext = createContext();
@@ -10,13 +10,12 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const hide = showSuspense("authenticating");
+    const hide = showSuspense("Authenticating");
 
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      console.log(firebaseUser);
+    const unsubscribe = onIdTokenChanged(auth, (firebaseUser) => {
+      console.log("Auth state updated:", firebaseUser);
 
       setUser(firebaseUser);
-
       setLoading(false);
       hide();
     });

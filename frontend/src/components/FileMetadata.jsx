@@ -33,7 +33,12 @@ export default function FileMetadata(props) {
 
   if (isLoading) return <LoadingContainer />;
 
-  if (isError) return <div>Error: {error.message}</div>;
+  if (isError)
+    return (
+      <Container>
+        <div>Error: {error.message}</div>
+      </Container>
+    );
 
   const streamingLink = getStreamingLink(data);
   const isAndroid = /Android/i.test(navigator.userAgent);
