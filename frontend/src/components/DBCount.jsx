@@ -11,9 +11,10 @@ export default function DBCount() {
 
   return (
     <div className="text-center my-3">
-      {metadataCount} files across {contentCount} movies & shows
+      {metadataCount && `${metadataCount} files across `}
+      {contentCount} Movies & Shows
       <br></br>
-      All ready to stream.
+      All ready to stream
     </div>
   );
 }

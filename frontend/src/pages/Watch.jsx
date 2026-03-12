@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getStreamingLink } from "../utils/link";
 import { Container } from "react-bootstrap";
@@ -16,12 +16,14 @@ export default function Watch() {
   });
 
   if (isError)
-    return (
-      <Container>
-        {console.log(error)}
-        <div className="text-center">Error: {error.message}</div>
-      </Container>
-    );
+    if (error.code == "permission-denied")
+      return <Navigate to={"/permission-denied"} replace />;
+    else
+      return (
+        <Container>
+          <div className="text-center">Error: {error.message}</div>
+        </Container>
+      );
 
   if (isSuccess && (data.media_type != media_type || data.tmdb_id != tmdb_id))
     return (

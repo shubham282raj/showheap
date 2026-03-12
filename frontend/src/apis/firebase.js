@@ -1,4 +1,4 @@
-import { db } from "../firebase";
+import { db, auth } from "../firebase";
 import {
   doc,
   collection,
@@ -10,6 +10,9 @@ import {
   getDoc,
   where,
   getCountFromServer,
+  setDoc,
+  deleteDoc,
+  runTransaction,
 } from "firebase/firestore";
 
 export const getContent = async (media_type, tmdb_id) => {
@@ -72,9 +75,72 @@ export const searchContentByName = async (name) => {
 };
 
 export const getCollectionCounts = async (collections) => {
-  const snaps = await Promise.all(
+  const results = await Promise.allSettled(
     collections.map((name) => getCountFromServer(collection(db, name))),
   );
 
-  return snaps.map((snap) => snap.data().count);
+  return results.map((result) => {
+    if (result.status === "fulfilled") {
+      return result.value.data().count;
+    }
+    return null; // error → return null
+  });
+};
+
+export const requestAccessWaitlist = async (uid, email) => {
+  const ref = doc(db, "alloweduserwl", uid);
+
+  const snap = await getDoc(ref);
+
+  if (snap.exists()) {
+    return { already: true };
+  }
+
+  await setDoc(ref, {
+    email,
+    created_at: new Date(),
+  });
+
+  return { already: false };
+};
+
+// admin
+
+export const getAllowedUsers = async () => {
+  const snap = await getDocs(collection(db, "allowedusers"));
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+};
+
+export const getWaitlist = async () => {
+  const snap = await getDocs(collection(db, "alloweduserwl"));
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+};
+
+export const removeAllowedUser = async (uid) => {
+  await deleteDoc(doc(db, "allowedusers", uid));
+};
+
+export const approveUser = async (uid) => {
+  const wlRef = doc(db, "alloweduserwl", uid);
+  const allowedRef = doc(db, "allowedusers", uid);
+
+  await runTransaction(db, async (tx) => {
+    const snap = await tx.get(wlRef);
+    if (!snap.exists()) throw new Error("User not in waitlist");
+
+    tx.set(allowedRef, snap.data());
+    tx.delete(wlRef);
+  });
+};
+
+export const isSuperUser = async () => {
+  const user = auth.currentUser;
+  if (!user) return false;
+
+  try {
+    const snap = await getDoc(doc(db, "superuser", user.uid));
+    return snap.exists();
+  } catch (e) {
+    return false;
+  }
 };

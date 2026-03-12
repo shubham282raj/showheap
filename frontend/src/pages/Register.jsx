@@ -2,13 +2,16 @@ import { useMutation } from "@tanstack/react-query";
 import { Card, Container } from "react-bootstrap";
 import { register } from "../apis/auth";
 import toast from "react-hot-toast";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function Register() {
+  const navigate = useNavigate();
+
   const registerMutation = useMutation({
     mutationFn: register,
     onSuccess: () => {
       toast.success("Account created successfully");
+      navigate("/");
     },
     onError: (e) => {
       toast.error(`Error: ${e.message}`);
