@@ -15,7 +15,7 @@ export default function ShowTile({ content }) {
 
   return (
     <Link
-      className="text-decoration-none"
+      className="text-decoration-none w-100"
       to={`/content/${content.media_type}/${content.tmdb_id}`}
     >
       <Card
