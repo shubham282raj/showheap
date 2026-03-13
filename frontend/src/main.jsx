@@ -1,7 +1,9 @@
+import "./registerSW";
 import { lazy, StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import BackgroundGrid from "./components/BackgroundGrid";
 import FadeSuspense from "./suspense/FadeSuspense";
+import InstallPWA from "./components/InstallPWA";
 
 document.documentElement.setAttribute("data-bs-theme", "dark");
 
@@ -13,5 +15,6 @@ createRoot(document.getElementById("root")).render(
     <FadeSuspense>
       <Main />
     </FadeSuspense>
+    <InstallPWA />
   </StrictMode>,
 );
