@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { auth } from "../firebase";
 import { onIdTokenChanged } from "firebase/auth";
 import { showSuspense } from "../suspense/suspenseController";
+import { canShowPWAInstall } from "../components/InstallPWA";
 
 const AuthContext = createContext();
 
@@ -13,7 +14,9 @@ export function AuthProvider({ children }) {
     const hide = showSuspense("Authenticating");
 
     const unsubscribe = onIdTokenChanged(auth, (firebaseUser) => {
-      console.log("Auth state updated:", firebaseUser);
+      if (firebaseUser && firebaseUser.emailVerified) {
+        canShowPWAInstall();
+      }
 
       setUser(firebaseUser);
       setLoading(false);
