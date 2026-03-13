@@ -5,13 +5,7 @@ import FadeSuspense from "./suspense/FadeSuspense";
 
 document.documentElement.setAttribute("data-bs-theme", "dark");
 
-// const Main = lazy(() => import("./lazy"));
-const Main = lazy(
-  () =>
-    new Promise((resolve) => {
-      setTimeout(() => resolve(import("./lazy")), 1000);
-    }),
-);
+const Main = lazy(() => import("./lazy"));
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>

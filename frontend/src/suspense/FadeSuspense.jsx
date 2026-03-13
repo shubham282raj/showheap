@@ -1,9 +1,5 @@
 import { Suspense, useState, useEffect, useRef } from "react";
-import {
-  subscribeSuspense,
-  getSuspenseState,
-  showSuspense,
-} from "./suspenseController";
+import { subscribeSuspense, getSuspenseState } from "./suspenseController";
 import MainSuspense from "./MainSuspense";
 
 function FadeOverlay({ children, show }) {
@@ -52,7 +48,7 @@ function SuspenseBridge({ onLoaded, children }) {
   return children;
 }
 
-export default function FadeSuspense({ children, minDuration = 100 }) {
+export default function FadeSuspense({ children, minDuration = 1000 }) {
   const [loaded, setLoaded] = useState(false);
 
   const [forcedState, setForcedState] = useState(getSuspenseState());

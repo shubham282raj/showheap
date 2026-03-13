@@ -9,7 +9,6 @@ export default function LogoText(props) {
         textTransform: "uppercase",
         color: "#fff",
         fontFamily: "'Courier New', 'Lucida Console', monospace",
-        // transform: "translateY(1px)",
         animation: "fadeUp 0.8s ease forwards",
         opacity: 1,
         ...props,
@@ -17,17 +16,20 @@ export default function LogoText(props) {
     >
       <span
         style={{
-          background:
-            "linear-gradient(135deg, #4ade80 0%, #22c55e 40%, #86efac 100%)",
-          WebkitBackgroundClip: "text",
-          WebkitTextFillColor: "transparent",
+          color: "#4ade80",
         }}
+        // style={{
+        //   background:
+        //     "linear-gradient(135deg, #4ade80 0%, #22c55e 40%, #86efac 100%)",
+        //   WebkitBackgroundClip: "text",
+        //   WebkitTextFillColor: "transparent",
+        // }}
       >
         show
       </span>
       <span
         style={{
-          color: "rgba(255,255,255,0.15)",
+          color: "rgba(255,255,255,0.3)",
         }}
       >
         heap
