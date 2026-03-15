@@ -5,3 +5,4 @@ telethon
 firebase-admin
 google-genai
 colorlog
+pyjwt

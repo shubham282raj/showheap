@@ -4,6 +4,8 @@ import firebase
 from .queue import ForwardFileQueue
 import workflow
 import utils
+import env
+import logging
 
 
 class ToShowDBWF:
@@ -36,11 +38,8 @@ class ToShowDBWF:
             metadata["channel_id"] = channel_id
 
             # send initial reply
-            stream_url = botutils.getStreamingLink(metadata)
-            stream_button = [Button.url("▶ Stream", stream_url)]
             self.init_reply = await self.event.reply(
                 f"Fetching Show Details...",
-                buttons=[stream_button],
                 parse_mode="md",
             )
 
@@ -59,11 +58,11 @@ class ToShowDBWF:
             await self.init_reply.delete()
 
         except Exception as e:
+            logging.error(e)
             shorterror = utils.shortenError(e)
             self.tglogger.append(shorterror, markdown=False)
             await self.event.reply(
-                f"Workflow Failed\n\n{shorterror}\n\nYou can still use the streaming link",
-                buttons=[Button.url("▶ Stream", botutils.getStreamingLink(metadata))],
+                f"Workflow Failed\n\n{shorterror}",
             )
             if self.init_reply:
                 await self.init_reply.delete()
@@ -119,23 +118,31 @@ class ToShowDBWF:
         """
 
         poster_url = f"https://image.tmdb.org/t/p/w500{content['poster_path']}"
-        streaming_link = botutils.getStreamingLink(metadata)
 
-        await self.event.reply(
-            caption,
-            file=poster_url if content.get("poster_path") else None,
-            parse_mode="html",
-            buttons=[
-                [Button.url("▶ Stream / Download", streaming_link)],
-                [
-                    Button.url(
-                        "TMDB",
-                        f"https://www.themoviedb.org/{metadata.get("media_type")}/{metadata.get("tmdb_id")}",
-                    ),
-                    Button.url(
-                        "ShowHeap",
-                        f"https://www.themoviedb.org/content/{metadata.get("media_type")}/{metadata.get("tmdb_id")}",
-                    ),
-                ],
+        buttons = [
+            [
+                Button.url(
+                    "TMDB",
+                    f"https://www.themoviedb.org/{metadata.get("media_type")}/{metadata.get("tmdb_id")}",
+                ),
+                Button.url(
+                    "ShowHeap",
+                    f"{env.FRONTEND_URL}/content/{metadata.get("media_type")}/{metadata.get("tmdb_id")}",
+                ),
             ],
-        )
+        ]
+
+        try:
+            await self.event.reply(
+                caption,
+                file=poster_url if content.get("poster_path") else None,
+                parse_mode="html",
+                buttons=buttons,
+            )
+        except:
+            # try sending without the buttons in case of a crash
+            await self.event.reply(
+                caption,
+                file=poster_url if content.get("poster_path") else None,
+                parse_mode="html",
+            )

@@ -1,5 +1,7 @@
 import traceback
 import os
+import pyffx
+import env
 
 
 class SingletonMeta(type):
@@ -73,3 +75,21 @@ def format_size(size: str | int):
         return f"{round(size / (1024**2), 2)} MB"
     else:
         return f"{round(size / 1024, 2)} KB"
+
+
+import pyffx
+
+
+class FPE:
+    SECRET = env.getenv("FPE_SECRET", "abcd").encode()
+    alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
+    @staticmethod
+    def encode_string(s: str):
+        cipher = pyffx.String(FPE.SECRET, alphabet=FPE.alphabet, length=len(s))
+        return cipher.encrypt(s)
+
+    @staticmethod
+    def decode_string(s: str):
+        cipher = pyffx.String(FPE.SECRET, alphabet=FPE.alphabet, length=len(s))
+        return cipher.decrypt(s)

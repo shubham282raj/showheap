@@ -5,8 +5,6 @@ import hashlib
 import logging
 
 
-STREAM_BASE_URL = env.getenv("STREAM_BASE_URL")
-HASH_LENGTH = int(env.getenv("HASH_LENGTH"))
 WF_LOG_CHANNEL_ID = int(env.getenv("WF_LOG_CHANNEL_ID"))
 
 
@@ -60,10 +58,6 @@ async def message_exists(chat_id: int, message_id: int) -> bool:
         raise Exception(
             "TG Error: Failed to check message existence via 'message_exists' function"
         )
-
-
-def getStreamingLink(metadata: dict):
-    return f"{STREAM_BASE_URL}/stream/{metadata.get('message_id')}/?hash={metadata.get('file_hash', '*'*20)[:HASH_LENGTH]}"
 
 
 def pack_file(file_name: str, file_size: int, mime_type: str, file_id: str) -> str:
