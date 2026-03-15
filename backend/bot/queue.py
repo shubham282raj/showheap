@@ -4,7 +4,7 @@ from telethon.errors import FloodWaitError
 import env
 import logging
 
-FILE_LOG_CHANNEL_ID = int(env.getenv("FILE_LOG_CHANNEL_ID"))
+FILE_LOG_CHANNEL_ID = int(env.FILE_LOG_CHANNEL_ID)
 
 
 class ForwardFileQueue:
@@ -19,7 +19,7 @@ class ForwardFileQueue:
         return await future
 
     @classmethod
-    async def forward_worker(cls, client: TelegramClient):
+    async def forward_worker(cls, client: TelegramClient, worker_id: int):
         while True:
             msg, future = await cls.queue.get()
 
@@ -49,5 +49,9 @@ class ForwardFileQueue:
                 cls.queue.task_done()
 
     @classmethod
-    def start_worker(cls, client: TelegramClient):
-        asyncio.create_task(cls.forward_worker(client))
+    def start_worker(cls, client: TelegramClient, num_workers: int = 1):
+        for i in range(num_workers):
+            asyncio.create_task(cls.forward_worker(client, worker_id=i))
+        logging.info(
+            "Telegram File Forwarding queue started with %d workers(s)", num_workers
+        )

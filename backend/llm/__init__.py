@@ -3,7 +3,7 @@ import env
 import asyncio
 from .queue_model import Model, Dispatcher
 
-client = genai.Client(api_key=env.getenv("GEMINI_API_KEY"))
+client = genai.Client(api_key=env.GEMINI_API_KEY)
 
 
 async def __generate_response(model, prompt):

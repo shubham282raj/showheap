@@ -3,7 +3,7 @@ import httpx
 import env
 
 TMDB_BASE_URL = "https://api.themoviedb.org/3"
-TMDB_ACCESS_TOKEN = env.getenv("TMDB_ACCESS_TOKEN")
+TMDB_ACCESS_TOKEN = env.TMDB_ACCESS_TOKEN
 
 
 async def queryv3(full_path: str, query_params: dict | None = None):

@@ -81,7 +81,7 @@ import pyffx
 
 
 class FPE:
-    SECRET = env.getenv("FPE_SECRET", "abcd").encode()
+    SECRET = env.FPE_SECRET.encode()
     alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
     @staticmethod

@@ -5,7 +5,7 @@ import hashlib
 import logging
 
 
-WF_LOG_CHANNEL_ID = int(env.getenv("WF_LOG_CHANNEL_ID", "0"))
+WF_LOG_CHANNEL_ID = int(env.WF_LOG_CHANNEL_ID)
 
 if not WF_LOG_CHANNEL_ID:
     logging.warning("WF_LOG_CHANNEL_ID not provided")

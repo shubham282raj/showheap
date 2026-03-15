@@ -8,12 +8,10 @@ from fastapi import HTTPException, Request, Depends, APIRouter
 from fastapi.responses import StreamingResponse
 
 
-PORT = int(env.getenv("PORT", "8000"))
-BASE_URL = env.getenv("BASE_URL", f"http://127.0.0.1:{PORT}")
-JWT_ALGORITHM = env.getenv("JWT_ALGORITHM", "HS256")
-JWT_SECRET_KEY = env.getenv(
-    "JWT_SECRET_KEY", "3e4f7f9c7d89c6c7d7e84b20c6a8a0e2e9b9d7e4f92d6b4f7a6b1e7f5c2a3b4c"
-)
+PORT = int(env.PORT)
+BASE_URL = env.BASE_URL
+JWT_ALGORITHM = env.JWT_ALGORITHM
+JWT_SECRET_KEY = env.JWT_SECRET_KEY
 
 
 def create_stream_token(uid: str, message_id: str):

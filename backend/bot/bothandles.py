@@ -4,9 +4,6 @@ from . import client
 from .workflow import ToShowDBWF
 
 
-FILE_LOG_CHANNEL_ID = int(env.getenv("FILE_LOG_CHANNEL_ID"))
-
-
 @client.on(events.NewMessage(pattern="/start"))
 async def start_handler(event):
     await event.respond("Bot is running 🚀")
