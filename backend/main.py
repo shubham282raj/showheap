@@ -1,3 +1,4 @@
+import logger  # logger config
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
@@ -5,7 +6,6 @@ import bot
 import bot.bothandles as bothandles  # register
 import env
 import tmdb
-import logger  # logger config
 import logging
 from stream import router as stream_router
 
@@ -13,15 +13,13 @@ from stream import router as stream_router
 @asynccontextmanager
 async def lifespan(app: FastAPI):
 
-    logging.info("🚀 Starting Telethon bot...")
+    logging.info("Starting Telethon bot")
 
     await bot.startbot()
 
-    logging.info("🤖 Telethon bot started")
-
     yield
 
-    logging.info("🛑 Stopping Telethon bot...")
+    logging.info("Stopping Telethon bot")
     await bot.client.disconnect()
 
 

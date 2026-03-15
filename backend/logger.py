@@ -6,7 +6,7 @@ logging.getLogger().handlers.clear()
 handler = colorlog.StreamHandler()
 
 formatter = colorlog.ColoredFormatter(
-    "%(log_color)s%(levelname)s%(reset)s | %(asctime)s | %(message)s",
+    "%(log_color)s%(levelname)-8s%(reset)s | %(asctime)s | %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
     log_colors={
         "DEBUG": "cyan",

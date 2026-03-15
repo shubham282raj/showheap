@@ -84,7 +84,7 @@ class Dispatcher:
         for i in range(self.num_workers):
             task = asyncio.create_task(self._worker(i), name=f"dispatcher-worker-{i}")
             self._tasks.append(task)
-        logging.info("Dispatcher started with %d worker(s).", self.num_workers)
+        logging.info("LLM Dispatcher started with %d worker(s).", self.num_workers)
 
     async def stop(self) -> None:
         for _ in self._tasks:

@@ -40,7 +40,9 @@ def verify_stream_token(token: str):
 
 
 router = APIRouter()
-httpxclient = httpx.AsyncClient()
+httpxclient = httpx.AsyncClient(
+    timeout=httpx.Timeout(connect=30.0, read=None, write=300.0, pool=30.0)
+)
 
 
 @router.get("/getStreamURL/{encoded_metadata_id}")

@@ -5,7 +5,10 @@ import hashlib
 import logging
 
 
-WF_LOG_CHANNEL_ID = int(env.getenv("WF_LOG_CHANNEL_ID"))
+WF_LOG_CHANNEL_ID = int(env.getenv("WF_LOG_CHANNEL_ID", "0"))
+
+if not WF_LOG_CHANNEL_ID:
+    logging.warning("WF_LOG_CHANNEL_ID not provided")
 
 
 class TGLogger:
@@ -30,7 +33,7 @@ class TGLogger:
             self.text += delimiter + pretty_format(data, markdown=markdown)
 
     async def commit(self):
-        if not self.text:
+        if not self.text or not self.chatID:
             return
         try:
             self.text.strip()
