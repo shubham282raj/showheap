@@ -49,10 +49,6 @@ def pretty_format(*args, markdown: bool = False, delimiter="\n"):
     return delimiter.join(formatted)
 
 
-import traceback
-import os
-
-
 def shortenError(e: Exception):
     tb = traceback.extract_tb(e.__traceback__) if e.__traceback__ else []
 
@@ -77,19 +73,20 @@ def format_size(size: str | int):
         return f"{round(size / 1024, 2)} KB"
 
 
-import pyffx
-
-
 class FPE:
-    SECRET = env.FPE_SECRET.encode()
+    SECRET = env.FPE_SECRET.encode() if env.FPE_SECRET else None
     alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
     @staticmethod
     def encode_string(s: str):
+        if not FPE.SECRET:  # skip encoding
+            return s
         cipher = pyffx.String(FPE.SECRET, alphabet=FPE.alphabet, length=len(s))
         return cipher.encrypt(s)
 
     @staticmethod
     def decode_string(s: str):
+        if not FPE.SECRET:  # skip decoding
+            return s
         cipher = pyffx.String(FPE.SECRET, alphabet=FPE.alphabet, length=len(s))
         return cipher.decrypt(s)

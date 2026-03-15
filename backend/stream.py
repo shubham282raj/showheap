@@ -15,6 +15,9 @@ JWT_SECRET_KEY = env.JWT_SECRET_KEY
 
 
 def create_stream_token(uid: str, message_id: str):
+    if not JWT_SECRET_KEY:
+        return None
+
     payload = {
         "uid": uid,
         "message_id": message_id,
@@ -28,6 +31,8 @@ def create_stream_token(uid: str, message_id: str):
 
 
 def verify_stream_token(token: str):
+    if not JWT_SECRET_KEY:
+        return None
     try:
         payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
         return payload
@@ -57,7 +62,7 @@ async def getStreamURL(
 
     token = create_stream_token(uid=user["uid"], message_id=str(message_id))
 
-    stream_url = f"{BASE_URL}/stream/{message_id}?token={token}"
+    stream_url = f"{BASE_URL}/stream/{message_id}{f"?token={token}" if token else ""}"
 
     data = {
         "media_type": metadata.get("media_type"),
@@ -84,11 +89,12 @@ async def stream_proxy_fsb(
 
     payload = verify_stream_token(token)
 
-    if not payload:
-        raise HTTPException(status_code=403, detail="Invalid or expired token")
+    if JWT_SECRET_KEY:
+        if not payload:
+            raise HTTPException(status_code=403, detail="Invalid or expired token")
 
-    if payload["message_id"] != message_id:
-        raise HTTPException(status_code=403, detail="Token mismatch")
+        if payload["message_id"] != message_id:
+            raise HTTPException(status_code=403, detail="Token mismatch")
 
     headers = {}
 
@@ -96,7 +102,7 @@ async def stream_proxy_fsb(
         headers["range"] = request.headers["range"]
 
     # url for internal fsb
-    url = f"http://127.0.0.1:{8080}/stream/{message_id}"
+    url = f"{env.TGFS_PROXY_URL}/stream/{message_id}"
 
     req = httpxclient.build_request("GET", url, headers=headers)
 

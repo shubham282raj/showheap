@@ -5,8 +5,9 @@ import logging
 from fastapi import Request, HTTPException
 import utils
 import json
+import env
 
-cred = credentials.Certificate("showheap-service.json")
+cred = credentials.Certificate(env.FIREBASE_SERVICE_JSON)
 firebase_admin.initialize_app(cred)
 
 db = firestore_async.client()

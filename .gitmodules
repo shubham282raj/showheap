@@ -1,0 +1,3 @@
+[submodule "backend/tgfs"]
+	path = backend/tgfs
+	url = https://github.com/EverythingSuckz/TG-FileStreamBot

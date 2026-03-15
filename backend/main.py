@@ -1,10 +1,10 @@
 import logger  # logger config
+import env
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 import bot
 import bot.bothandles as bothandles  # register
-import env
 import tmdb
 import logging
 from stream import router as stream_router
@@ -26,7 +26,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 app.include_router(stream_router)
 
-origins = [env.getenv("FRONTEND_URL")]
+origins = [env.FRONTEND_URL]
 
 app.add_middleware(
     CORSMiddleware,

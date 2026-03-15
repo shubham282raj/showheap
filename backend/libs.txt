@@ -1,0 +1,9 @@
+uvicorn
+fastapi
+dotenv
+telethon
+firebase-admin
+google-genai
+colorlog
+pyjwt
+pyffx
