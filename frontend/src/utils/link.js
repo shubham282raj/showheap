@@ -1,15 +1,3 @@
-const FILE_HASH_LENGTH = Number(import.meta.env.VITE_FILE_HASH_LENGTH) || 6;
-const VITE_STREAM_BASE_URL = import.meta.env.VITE_STREAM_BASE_URL;
-const VITE_PROXY_BASE_URL = import.meta.env.VITE_BASE_URL;
-
-export const getStreamingLink = (file) => {
-  const base =
-    localStorage.getItem("useproxy") == "true"
-      ? VITE_PROXY_BASE_URL
-      : VITE_STREAM_BASE_URL;
-  return `${base}/stream/${file.message_id}?hash=${file.file_hash.slice(0, FILE_HASH_LENGTH)}`;
-};
-
 export const createIntentUrl = (url, packageName) => {
   const parsed = new URL(url);
   const scheme = parsed.protocol.replace(":", "");

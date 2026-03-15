@@ -53,7 +53,7 @@ export const router = createBrowserRouter([
             element: <Content />,
           },
           {
-            path: "watch/:media_type/:tmdb_id/:file_id",
+            path: "watch/:media_type/:tmdb_id/:encoded_metadata_id",
             element: <Watch />,
           },
           {
