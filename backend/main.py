@@ -24,9 +24,8 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
-app.include_router(stream_router)
 
-origins = [env.FRONTEND_URL]
+origins = env.FRONTEND_URL.split(",")
 
 app.add_middleware(
     CORSMiddleware,
@@ -35,6 +34,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(stream_router)
 
 
 @app.get("/")

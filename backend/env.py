@@ -46,7 +46,7 @@ GEMINI_API_KEY = getenv("GEMINI_API_KEY", required=True)
 FIREBASE_SERVICE_JSON = load_firebase_service_json()
 
 # optional
-FRONTEND_URL = getenv("FRONTEND_URL", default=None)
+FRONTEND_URL = getenv("FRONTEND_URL", default="")
 WF_LOG_CHANNEL_ID = getenv("WF_LOG_CHANNEL_ID", default="0")
 PORT = getenv("PORT", default="8000")
 BASE_URL = getenv("BASE_URL", default=f"http://127.0.0.1:{PORT}")
