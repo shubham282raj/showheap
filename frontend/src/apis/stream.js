@@ -14,7 +14,12 @@ export const fetchStreamingLink = async (encoded_metadata_id) => {
     headers: {
       Authorization: `Bearer ${token}`,
     },
-  }).then((res) => res.json());
+  });
 
-  return res;
+  if (!res.ok) {
+    const json = await res.json();
+    throw new Error(json.detail);
+  }
+
+  return await res.json();
 };

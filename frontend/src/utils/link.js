@@ -6,7 +6,6 @@ export const createIntentUrl = (url, packageName) => {
   // Formatted as a single continuous line to prevent URI parsing errors
   const link = `intent://${parsed.host}${parsed.pathname}${parsed.search}#Intent;${packageParam}action=android.intent.action.VIEW;type=video/mp4;scheme=${scheme};end`;
 
-  console.log(link);
   return link;
 };
 

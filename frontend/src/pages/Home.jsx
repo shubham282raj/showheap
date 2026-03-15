@@ -33,7 +33,7 @@ export default function Home() {
       );
 
   return (
-    <Container className="my-1">
+    <Container>
       <Row className="g-2">
         {data.pages.map((page) =>
           page.docs.map((doc) => {

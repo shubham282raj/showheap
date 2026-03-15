@@ -15,7 +15,13 @@ export default function SearchAdv() {
   const [tvCheck, setTVCheck] = useState(true);
 
   const queryType =
-    movieCheck && tvCheck ? "multi" : movieCheck ? "movie" : "tv";
+    movieCheck && tvCheck
+      ? "multi"
+      : movieCheck
+        ? "movie"
+        : tvCheck
+          ? "tv"
+          : null;
 
   const {
     data,
@@ -27,7 +33,7 @@ export default function SearchAdv() {
     error,
   } = useInfiniteQuery({
     queryKey: ["advsearch", queryType, queryParam],
-    enabled: !!queryParam,
+    enabled: !!queryParam && !!queryType,
     queryFn: async ({ pageParam: page = 1 }) =>
       searchTMDBContentByName(queryType, queryParam, page),
     getNextPageParam: (lastQuery) => {
@@ -54,7 +60,6 @@ export default function SearchAdv() {
           type="checkbox"
           label="Movies"
           checked={movieCheck}
-          disabled={movieCheck && !tvCheck}
           onChange={(e) => setMovieCheck(e.target.checked)}
           id="movie_checkbox"
         />
@@ -63,21 +68,24 @@ export default function SearchAdv() {
           style={{ accentColor: "var(--bs-primary)" }}
           label={"TV Shows"}
           checked={tvCheck}
-          disabled={!movieCheck && tvCheck}
           onChange={(e) => setTVCheck(e.target.checked)}
           id="tv_checkbox"
         />
       </div>
 
       {/* instructions */}
-      <div className="text-center mb-2" style={{ lineHeight: "1.8rem" }}>
-        These results are TMDB query results
-        <br /> Select a content to further check availabilty in our database
-      </div>
+      {queryType ? (
+        <div className="text-center mb-2" style={{ lineHeight: "1.8rem" }}>
+          These results are TMDB query results
+          <br /> Select a content to further check availabilty in our database
+        </div>
+      ) : (
+        <div className="text-center">Select either Movie or TV Shows</div>
+      )}
 
       {/* results */}
       {data && data.pages && (
-        <Row className="px-1">
+        <Row className="g-2">
           {data.pages.map((page) =>
             page.results.map((content) =>
               content.media_type == "person" ? null : (
@@ -87,7 +95,7 @@ export default function SearchAdv() {
                   sm={6}
                   md={4}
                   lg={3}
-                  className="px-0"
+                  className="d-flex"
                 >
                   <ShowTile
                     content={{

@@ -42,11 +42,11 @@ export default function Search() {
     );
 
   return (
-    <Container className="my-2">
+    <Container>
       {data &&
         (data.length ? (
           <>
-            <Row className="px-1">
+            <Row className="g-2">
               {data.map((content) => (
                 <Col
                   key={content.id}
@@ -54,7 +54,7 @@ export default function Search() {
                   sm={6}
                   md={4}
                   lg={3}
-                  className="px-0"
+                  className="d-flex"
                 >
                   <ShowTile content={content} />
                 </Col>
