@@ -7,6 +7,7 @@ import bot
 import bot.bothandles as bothandles  # register
 import tmdb
 import logging
+from datetime import datetime, timezone
 from stream import router as stream_router
 
 
@@ -23,6 +24,7 @@ async def lifespan(app: FastAPI):
     await bot.client.disconnect()
 
 
+start_time = datetime.now(timezone.utc)
 app = FastAPI(lifespan=lifespan)
 
 origins = [o.strip() for o in env.FRONTEND_URL.split(",")]
@@ -39,9 +41,16 @@ app.add_middleware(
 app.include_router(stream_router)
 
 
-@app.get("/")
+@app.api_route("/", methods=["GET", "HEAD"])
 async def root():
-    return {"status": "running"}
+    now = datetime.now(timezone.utc)
+    uptime = now - start_time
+
+    return {
+        "status": "running",
+        "uptime": str(uptime).split(".")[0],  # removes microseconds
+        "uptime_seconds": int(uptime.total_seconds()),
+    }
 
 
 @app.api_route("/tmdb/{full_path:path}")

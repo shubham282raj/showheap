@@ -5,7 +5,7 @@ import firebase
 import httpx
 import utils
 from fastapi import HTTPException, Request, Depends, APIRouter
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, Response
 
 
 PORT = int(env.PORT)
@@ -46,6 +46,24 @@ router = APIRouter()
 httpxclient = httpx.AsyncClient(
     timeout=httpx.Timeout(connect=30.0, read=None, write=300.0, pool=30.0)
 )
+
+
+@router.get("/ping-tgfs")
+async def ping_go():
+    url = f"{env.TGFS_PROXY_URL}/"
+
+    try:
+        resp = await httpxclient.get(url)
+    except httpx.ConnectError:
+        raise HTTPException(status_code=502, detail="Go server unreachable")
+    except httpx.ReadTimeout:
+        raise HTTPException(status_code=504, detail="Go server timeout")
+
+    return Response(
+        content=resp.content,
+        status_code=resp.status_code,
+        headers=dict(resp.headers),
+    )
 
 
 @router.get("/getStreamURL/{encoded_metadata_id}")
