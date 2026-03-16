@@ -25,7 +25,8 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-origins = env.FRONTEND_URL.split(",")
+origins = [o.strip() for o in env.FRONTEND_URL.split(",")]
+logging.info(f"CORS origins: {origins}")
 
 app.add_middleware(
     CORSMiddleware,
@@ -43,7 +44,7 @@ async def root():
     return {"status": "running"}
 
 
-@app.api_route("/tmdb/{full_path:path}", methods=["GET"])
+@app.api_route("/tmdb/{full_path:path}")
 async def tmdb_proxy(full_path: str, request: Request):
     params = dict(request.query_params)
     return await tmdb.queryv3(full_path, params)

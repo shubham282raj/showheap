@@ -106,7 +106,12 @@ async def stream_proxy_fsb(
 
     req = httpxclient.build_request("GET", url, headers=headers)
 
-    resp = await httpxclient.send(req, stream=True)
+    try:
+        resp = await httpxclient.send(req, stream=True)
+    except httpx.ConnectError:
+        raise HTTPException(status_code=502, detail="Upstream server unreachable")
+    except httpx.ReadTimeout:
+        raise HTTPException(status_code=504, detail="Upstream server timeout")
 
     response_headers = {"content-type": "video/mp4"}
 

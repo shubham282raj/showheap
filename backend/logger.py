@@ -29,8 +29,5 @@ for lib in [
     "urllib3",
     "google_genai",
     "telethon",
-    "uvicorn",
-    "uvicorn.error",
-    "uvicorn.access",
 ]:
     logging.getLogger(lib).setLevel(logging.WARNING)
