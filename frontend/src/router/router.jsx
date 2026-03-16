@@ -15,6 +15,7 @@ import PermissionDenied from "../pages/PermissionDenied";
 import Admin from "../pages/Admin/Admin";
 import AllowedUsers from "../pages/Admin/AllowedUsers";
 import Waitlist from "../pages/Admin/Waitlist";
+import WatchStream from "../pages/WatchStream";
 
 export const router = createBrowserRouter([
   {
@@ -40,6 +41,10 @@ export const router = createBrowserRouter([
       {
         path: "verification",
         element: <Verification />,
+      },
+      {
+        path: "warchstream/:safeSrc",
+        element: <WatchStream />,
       },
       {
         element: <ProtectedRoute />,

@@ -6,6 +6,7 @@ import {
   CirclePlay,
   ClipboardCopy,
   Download,
+  Globe,
   TrafficCone,
   Tv,
 } from "lucide-react";
@@ -88,17 +89,12 @@ export default function FileMetadata(props) {
 
                 {/* Android */}
                 <div className="d-flex flex-wrap gap-2 justify-content-center align-items-center">
-                  {/* {isAndroid && (
-                    <StreamButton
-                      icon={<SquarePlay />}
-                      text={"MX Player"}
-                      backgroundColor={"#3C8CF0"}
-                      url={createIntentUrl(
-                        streamingLink,
-                        "com.mxtech.videoplayer.ad",
-                      )}
-                    />
-                  )} */}
+                  <StreamButton
+                    icon={<Globe />}
+                    text={"Browser Native"}
+                    backgroundColor={"var(--bs-dark-bg-subtle)"}
+                    url={`/warchstream/${encodeURIComponent(streamingLink)}`}
+                  />
                   {isAndroid && (
                     <StreamButton
                       icon={<TrafficCone />}
@@ -118,7 +114,7 @@ export default function FileMetadata(props) {
                   {isAndroid && (
                     <StreamButton
                       icon={<Tv />}
-                      text={"Play Online"}
+                      text={"Choose Player"}
                       backgroundColor={"#0CAC72"}
                       url={createIntentUrl(streamingLink)}
                     />
