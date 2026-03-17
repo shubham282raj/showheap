@@ -3,6 +3,8 @@ from . import client
 from utils import pretty_format
 import hashlib
 import logging
+import firebase
+import telethon
 
 
 WF_LOG_CHANNEL_ID = int(env.WF_LOG_CHANNEL_ID)
@@ -66,3 +68,11 @@ async def message_exists(chat_id: int, message_id: int) -> bool:
 def pack_file(file_name: str, file_size: int, mime_type: str, file_id: str) -> str:
     data = file_name + str(file_size) + mime_type + str(file_id)
     return hashlib.md5(data.encode("utf-8")).hexdigest()
+
+
+async def isUserAllowed(event: telethon.events.NewMessage):
+    try:
+        return await firebase.isTGAllowedUser(str(event.sender_id))
+    except:
+        logging.error("isUserAllowed botutil failed, returning False")
+        return False

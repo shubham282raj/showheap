@@ -71,6 +71,11 @@ async def getStreamURL(
     encoded_metadata_id: str, request: Request, user=Depends(firebase.verify_user)
 ):
     metadata_id = utils.FPE.decode_string(encoded_metadata_id)
+    user_uid = request.state.user.get("uid")
+
+    if not await firebase.isShowHeapAllowedUser(user_uid):
+        raise HTTPException(status_code=401, detail="permission-denied")
+
     metadata = await firebase.showDB.getMetadata(metadata_id)
 
     if not metadata:

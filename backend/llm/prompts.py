@@ -35,8 +35,6 @@ Answer:
 
     responsetxt, logs = await dispatcher.submit(prompt)
 
-    # Exception("LLM Exception: Failed to extract movie name from 'file_name'")
-
     return responsetxt, logs
 
 
@@ -44,36 +42,133 @@ async def get_tmdb_id(
     filename: str, show_name: str, description: str, candidates: list
 ):
     prompt = f"""
-    You are selecting the best matching TMDB entry.
+You are selecting the best matching TMDB entry.
 
-    Filename:
-    {filename}
+Inputs:
 
-    Extracted Show Name:
-    {show_name}
+Filename:
+{filename}
 
-    Description:
-    {description}
+Extracted Show Name:
+{show_name}
 
-    Candidate Entries:
-    {candidates}
+Description:
+{description}
 
-    Rules:
-    - Pick the entry that best matches the show name, filename, description.
-    - Prefer exact title matches.
-    - Choose correctly between 'movie' and 'tv' media types
-    - Ignore unrelated titles.
-    - Return ONLY the numerical id.
-    - Do not explain.
-    - Do not return anything except the number.
+Candidate Entries (each has: title, id, release_date, media_type):
+{candidates}
 
-    Answer:
-    """
+
+Task:
+Pick the SINGLE best matching entry.
+
+
+Matching Strategy (VERY IMPORTANT):
+
+1. TITLE MATCH (highest priority)
+   - Prefer exact or near-exact matches with the extracted show name.
+   - Ignore differences in punctuation, dots, casing.
+   - Example: "Breaking.Bad" → "Breaking Bad"
+
+2. MEDIA TYPE MATCH
+   - Determine whether the content is a MOVIE or TV show using clues:
+     • TV clues → S01E01, Season, Episode, multi-episode, "Complete Season"
+     • Movie clues → year (e.g., 2019), no episode pattern, "BluRay", "WEB-DL"
+   - Match this with candidate.media_type ("tv" or "movie").
+   - Strongly prefer correct media type over title similarity if conflict exists.
+
+3. RELEASE DATE VALIDATION
+   - Extract year hints from filename or description.
+     Examples:
+       "The.Dark.Knight.2008" → 2008
+       "Avatar.2022" → 2022
+   - Compare with candidate.release_date.
+   - Prefer candidates with matching or very close year.
+
+4. DESCRIPTION CONTEXT
+   - Use description to disambiguate remakes, sequels, or similarly named titles.
+
+5. IGNORE:
+   - Resolution (1080p, 720p)
+   - Codec (x264, HEVC)
+   - Release groups
+   - File extensions
+
+
+Decision Rules:
+
+- Choose the candidate that best satisfies ALL:
+  title similarity + correct media_type + matching release year.
+- If title matches but media_type is wrong → REJECT.
+- If multiple titles match → use release_date to decide.
+- If still ambiguous → pick the closest overall match.
+
+
+Output Rules:
+
+- Return ONLY the numerical id.
+- No explanation.
+- No text.
+- No formatting.
+- Single line only.
+
+
+Examples:
+
+Example 1:
+Filename: Breaking.Bad.S04E13.1080p.mkv
+Show Name: Breaking Bad
+Candidates:
+[
+  {{ "title": "Breaking Bad", "id": 1396, "release_date": "2008-01-20", "media_type": "tv" }},
+  {{ "title": "Breaking Bad Movie", "id": 9999, "release_date": "2015-01-01", "media_type": "movie" }}
+]
+Output:
+1396
+
+
+Example 2:
+Filename: The.Dark.Knight.2008.1080p.BluRay.mkv
+Show Name: The Dark Knight
+Candidates:
+[
+  {{ "title": "The Dark Knight", "id": 155, "release_date": "2008-07-18", "media_type": "movie" }},
+  {{ "title": "The Dark Knight Returns", "id": 49026, "release_date": "2012-09-25", "media_type": "movie" }}
+]
+Output:
+155
+
+
+Example 3:
+Filename: The.Office.US.S02E03.mkv
+Show Name: The Office
+Candidates:
+[
+  {{ "title": "The Office", "id": 2316, "release_date": "2005-03-24", "media_type": "tv" }},
+  {{ "title": "The Office", "id": 10429, "release_date": "1995-07-01", "media_type": "tv" }}
+]
+Output:
+2316
+
+
+Example 4:
+Filename: Avatar.2009.1080p.mkv
+Show Name: Avatar
+Candidates:
+[
+  {{ "title": "Avatar", "id": 19995, "release_date": "2009-12-18", "media_type": "movie" }},
+  {{ "title": "Avatar: The Last Airbender", "id": 246, "release_date": "2005-02-21", "media_type": "tv" }}
+]
+Output:
+19995
+
+
+Answer:
+"""
+
     responsetxt, logs = await dispatcher.submit(prompt)
 
-    # Exception("LLM Exception: Faild to get 'tmdb_id' from 'file_name', 'show_name' and 'candidates'")
-
-    return responsetxt, logs
+    return responsetxt.strip(), logs
 
 
 async def extract_episode(filename: str, description: str, season_info: dict):
@@ -152,7 +247,5 @@ Answer:
 """
 
     responsetxt, logs = await dispatcher.submit(prompt)
-
-    # Exception("LLM Exception: Failed to extract Season/Episode Data from 'file_name' and 'season_info'")
 
     return responsetxt.upper(), logs

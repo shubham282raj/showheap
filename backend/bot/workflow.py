@@ -23,6 +23,8 @@ class ToShowDBWF:
             # get file metadata
             metadata = self.getFileMetadata()
 
+            self.tglogger.append({"metadata": metadata})
+
             # check if the file exists is database and telegram both
             duplicate = await self.checkDuplicate(metadata["file_id"])
             if duplicate:
@@ -103,8 +105,9 @@ class ToShowDBWF:
                 content = await firebase.showDB.getContent(
                     metadata["media_type"], metadata["tmdb_id"]
                 )
-                await self.replySuccessFileWF(content, metadata)
-                return True
+                if content:
+                    await self.replySuccessFileWF(content, metadata)
+                    return True
 
         return False
 
@@ -131,6 +134,16 @@ class ToShowDBWF:
                 ),
             ],
         ]
+
+        self.tglogger.append(
+            {
+                "Sent File Details": {
+                    "title": content.get("title") or content.get("name"),
+                    "type": metadata["media_type"],
+                    "tmdb_id": metadata.get("tmdb_id"),
+                }
+            }
+        )
 
         try:
             await self.event.reply(

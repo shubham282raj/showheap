@@ -118,3 +118,13 @@ async def verify_user(request: Request):
 
     except Exception:
         raise HTTPException(status_code=401, detail="Invalid token")
+
+
+async def isTGAllowedUser(sender_id):
+    doc = await db.collection("allowedusers").document(str(sender_id)).get()
+    return doc.exists and doc.to_dict().get("type") == "tgalloweduser"
+
+
+async def isShowHeapAllowedUser(uid):
+    doc = await db.collection("allowedusers").document(str(uid)).get()
+    return doc.exists
