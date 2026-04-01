@@ -18,7 +18,7 @@ export default function PermissionDenied() {
   const already = mutation.data?.already;
 
   return (
-    <Container className="position-absolute top-0 start-0 d-flex justify-content-center align-items-center vh-100">
+    <Container className="position-absolute top-0 start-50 translate-middle-x d-flex justify-content-center align-items-center vh-100">
       <Card className="text-center">
         <Card.Body>
           <Card.Title>Permission Denied</Card.Title>

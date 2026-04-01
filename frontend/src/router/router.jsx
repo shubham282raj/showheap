@@ -11,7 +11,6 @@ import Register from "../pages/Register";
 import PasswordReset from "../pages/PasswordReset";
 import Verification from "../pages/Verification";
 import Logout from "../pages/Logout";
-import PermissionDenied from "../pages/PermissionDenied";
 import Admin from "../pages/Admin/Admin";
 import AllowedUsers from "../pages/Admin/AllowedUsers";
 import Waitlist from "../pages/Admin/Waitlist";
@@ -86,10 +85,6 @@ export const router = createBrowserRouter([
                 element: <Waitlist />,
               },
             ],
-          },
-          {
-            path: "permission-denied",
-            element: <PermissionDenied />,
           },
         ],
       },

@@ -23,14 +23,11 @@ export default function Home() {
   if (isLoading) return <LoadingContainer />;
 
   if (isError)
-    if (error.code == "permission-denied")
-      return <Navigate to={"/permission-denied"} replace />;
-    else
-      return (
-        <Container>
-          <div className="text-center">Error: {error.message}</div>
-        </Container>
-      );
+    return (
+      <Container>
+        <div className="text-center">Error: {error.message}</div>
+      </Container>
+    );
 
   return (
     <Container>

@@ -5,6 +5,7 @@ import FileMetadata from "../components/FileMetadata";
 import WatchFile from "../components/WatchFile";
 import { fetchStreamingLink } from "../apis/stream";
 import { LoadingContainer } from "../components/Loader";
+import PermissionDenied from "../components/PermissionDenied";
 
 export default function Watch() {
   const { media_type, tmdb_id, encoded_metadata_id } = useParams();
@@ -17,11 +18,13 @@ export default function Watch() {
   if (isLoading) return <LoadingContainer />;
 
   if (isError)
-    return (
-      <Container>
-        <div className="text-center">Error: {error.message}</div>
-      </Container>
-    );
+    if (error.message == "permission-denied") return <PermissionDenied />;
+    else
+      return (
+        <Container>
+          <div className="text-center">Error: {error.message}</div>
+        </Container>
+      );
 
   if (
     isSuccess &&
