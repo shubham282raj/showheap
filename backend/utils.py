@@ -2,6 +2,7 @@ import traceback
 import os
 import pyffx
 import env
+from urllib.parse import quote
 
 
 class SingletonMeta(type):
@@ -90,3 +91,31 @@ class FPE:
             return s
         cipher = pyffx.String(FPE.SECRET, alphabet=FPE.alphabet, length=len(s))
         return cipher.decrypt(s)
+
+
+def sanitize_header(v: str) -> str:
+    return v.encode("latin-1", "ignore").decode("latin-1")
+
+
+def fix_content_disposition(cd: str, force_download: bool = False) -> str:
+
+    if force_download:
+        if "inline" in cd:
+            cd = cd.replace("inline", "attachment", 1)
+        else:
+            cd = "attachment"
+
+    # Extract filename if exists
+    if "filename=" in cd:
+        try:
+            filename = cd.split("filename=")[-1].strip('"')
+            safe_filename = filename.encode("latin-1", "ignore").decode("latin-1")
+
+            return (
+                f'attachment; filename="{safe_filename}"; '
+                f"filename*=UTF-8''{quote(filename)}"
+            )
+        except Exception:
+            pass
+
+    return sanitize_header(cd)

@@ -145,16 +145,22 @@ async def stream_proxy_fsb(
         "content-disposition",
     ]:
         if h in resp.headers:
-            response_headers[h] = resp.headers[h]
+            value = resp.headers[h]
 
-    if download:
-        if "inline" in response_headers["content-disposition"]:
-            response_headers["content-disposition"] = response_headers[
-                "content-disposition"
-            ].replace("inline", "attachment", 1)
-        else:
-            response_headers["content-disposition"] = "attachment"
+            if h == "content-disposition":
+                value = utils.fix_content_disposition(
+                    value, force_download=bool(download)
+                )
+            else:
+                value = utils.sanitize_header(value)
+
+            response_headers[h] = value
+
+    if download and "content-disposition" not in response_headers:
+        response_headers["content-disposition"] = "attachment"
 
     return StreamingResponse(
-        resp.aiter_bytes(), status_code=resp.status_code, headers=response_headers
+        resp.aiter_bytes(),
+        status_code=resp.status_code,
+        headers=response_headers,
     )
