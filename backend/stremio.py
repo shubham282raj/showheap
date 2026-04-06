@@ -88,11 +88,23 @@ async def get_stream(type: str, id: str):
         return res
 
     fb_query = await firebase.queryCollection("metadata", {"imdb_id": imdb_id})
+
+    if type == "series":
+        fb_query = sorted(
+            fb_query,
+            key=lambda x: (
+                x.get("episode_code", ""),
+                x.get("file_size", 0),
+            ),
+        )
+    else:
+        fb_query = sorted(fb_query, key=lambda x: x.get("file_size", 0))
+
     for metadata in fb_query:
         url = stream.create_stream_url(STREMIO_UID_BYPASS, metadata["message_id"])
         res["streams"].append(
             {
-                "name": f"ShowHeap {metadata.get("episode_code", "")}".strip(),
+                "name": f"ShowHeap {metadata.get('episode_code', '')}".strip(),
                 "description": "\n".join(
                     x
                     for x in [
