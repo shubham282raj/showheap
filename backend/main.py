@@ -8,7 +8,8 @@ import bot.bothandles as bothandles  # register
 import tmdb
 import logging
 from datetime import datetime, timezone
-from stream import router as stream_router
+import stream
+import stremio
 
 
 @asynccontextmanager
@@ -38,7 +39,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(stream_router)
+app.include_router(stream.router)
+app.include_router(stremio.router, prefix="/stremio")
 
 
 @app.api_route("/", methods=["GET", "HEAD"])

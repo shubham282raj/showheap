@@ -10,6 +10,7 @@ from fastapi.responses import StreamingResponse, Response
 
 PORT = int(env.PORT)
 BASE_URL = env.BASE_URL
+TGFS_PROXY_URL = env.TGFS_PROXY_URL
 JWT_ALGORITHM = env.JWT_ALGORITHM
 JWT_SECRET_KEY = env.JWT_SECRET_KEY
 
@@ -42,6 +43,12 @@ def verify_stream_token(token: str):
         return None
 
 
+def create_stream_url(uid, message_id):
+    token = create_stream_token(uid=uid, message_id=str(message_id))
+    stream_url = f"{BASE_URL}/stream/{message_id}{f"?token={token}" if token else ""}"
+    return stream_url
+
+
 router = APIRouter()
 httpxclient = httpx.AsyncClient(
     timeout=httpx.Timeout(connect=30.0, read=None, write=300.0, pool=30.0)
@@ -50,7 +57,7 @@ httpxclient = httpx.AsyncClient(
 
 @router.get("/ping-tgfs")
 async def ping_go():
-    url = f"{env.TGFS_PROXY_URL}/"
+    url = f"{TGFS_PROXY_URL}/"
 
     try:
         resp = await httpxclient.get(url)
@@ -83,9 +90,7 @@ async def getStreamURL(
 
     message_id = metadata["message_id"]
 
-    token = create_stream_token(uid=user["uid"], message_id=str(message_id))
-
-    stream_url = f"{BASE_URL}/stream/{message_id}{f"?token={token}" if token else ""}"
+    stream_url = create_stream_url(user_uid, message_id)
 
     data = {
         "media_type": metadata.get("media_type"),
@@ -125,7 +130,7 @@ async def stream_proxy_fsb(
         headers["range"] = request.headers["range"]
 
     # url for internal fsb
-    url = f"{env.TGFS_PROXY_URL}/stream/{message_id}"
+    url = f"{TGFS_PROXY_URL}/stream/{message_id}"
 
     req = httpxclient.build_request("GET", url, headers=headers)
 

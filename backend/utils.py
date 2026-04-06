@@ -74,6 +74,10 @@ def format_size(size: str | int):
         return f"{round(size / 1024, 2)} KB"
 
 
+def wrap_str(s: str, max_len: int) -> str:
+    return "\n".join(s[i : i + max_len] for i in range(0, len(s), max_len))
+
+
 class FPE:
     SECRET = env.FPE_SECRET.encode() if env.FPE_SECRET else None
     alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"

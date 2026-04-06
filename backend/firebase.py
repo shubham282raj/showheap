@@ -1,6 +1,7 @@
 import firebase_admin
 from firebase_admin import credentials, firestore_async, auth
 from firebase_admin.firestore import SERVER_TIMESTAMP
+from google.cloud.firestore_v1.base_query import FieldFilter
 import logging
 from fastapi import Request, HTTPException
 import utils
@@ -128,3 +129,29 @@ async def isTGAllowedUser(sender_id):
 async def isShowHeapAllowedUser(uid):
     doc = await db.collection("allowedusers").document(str(uid)).get()
     return doc.exists
+
+
+async def getDoc(collection, doc):
+    try:
+        doc_ref = db.collection(collection).document(doc)
+        snapshot = await doc_ref.get()
+
+        if snapshot.exists:
+            return snapshot.to_dict()
+        else:
+            return None
+
+    except Exception as e:
+        print(f"Error fetching document: {e}")
+        return None
+
+
+async def queryCollection(collection, filters: dict):
+    ref = db.collection(collection)
+
+    for field, value in filters.items():
+        ref = ref.where(filter=FieldFilter(field, "==", value))
+
+    docs = await ref.get()
+
+    return [{**doc.to_dict(), "id": doc.id} for doc in docs]
