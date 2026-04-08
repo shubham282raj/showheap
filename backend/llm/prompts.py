@@ -102,7 +102,8 @@ Decision Rules:
 - If title matches but media_type is wrong → REJECT.
 - If multiple titles match → use release_date to decide.
 - If still ambiguous → pick the closest overall match.
-
+- If NONE of the candidates reasonably match the title → return -1.
+- Do NOT force a match if title similarity is low or unrelated.
 
 Output Rules:
 
@@ -162,6 +163,16 @@ Candidates:
 Output:
 19995
 
+Example 5 (No Match → Fallback):
+Filename: The.Walking.Dead.2023.1080p.mkv
+Show Name: The Walking Dead
+Candidates:
+[
+  {{ "title": "Inception", "id": 27205, "release_date": "2010-07-16", "media_type": "movie" }},
+  {{ "title": "Interstellar", "id": 157336, "release_date": "2014-11-07", "media_type": "movie" }}
+]
+Output:
+-1
 
 Answer:
 """

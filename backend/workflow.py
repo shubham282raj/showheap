@@ -45,6 +45,11 @@ async def fetchMediaDetails(metadata: dict, tglogger: botutils.TGLogger = None):
         reduced_candidates,
     )
     tmdbID = int(tmdbID)
+    if tmdbID == -1:
+        tglogger.append({"candidates": reduced_candidates})
+        raise Exception(
+            f"{extracted_name} did not match from any of the {len(reduced_candidates)} candidates"
+        )
     metadata["tmdb_id"] = tmdbID
     tglogger.append({"TMDB ID": f"'{tmdbID}'", "LLM Logs": llm_logs}, delimiter="\n")
 
