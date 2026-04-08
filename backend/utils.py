@@ -123,3 +123,11 @@ def fix_content_disposition(cd: str, force_download: bool = False) -> str:
             pass
 
     return sanitize_header(cd)
+
+
+def build_episode_code(season=-1, episode_start=-1, episode_end=-1):
+
+    if episode_start == episode_end:
+        return f"S{season:02d}E{episode_start:02d}"
+
+    return f"S{season:02d}E{episode_start:02d}-{episode_end:02d}"

@@ -32,7 +32,7 @@ async def get_catalog(type: str, id: str, skip: int = 0):
     PAGE_SIZE = 100
 
     query = (
-        firebase.db.collection("content")
+        firebase.db.collection("shows")
         .where(filter=firebase.FieldFilter("media_type", "==", id))
         .order_by("updated_at", direction="DESCENDING")
         .limit(skip + PAGE_SIZE)
@@ -48,7 +48,7 @@ async def get_catalog(type: str, id: str, skip: int = 0):
             {
                 "id": d.get("imdb_id", "tmdb_" + str(d["tmdb_id"])),
                 "type": type,
-                "name": d["name"],
+                "name": d["title"],
                 "poster": f"https://image.tmdb.org/t/p/w500{d.get('poster_path')}",
             }
         )
@@ -82,37 +82,46 @@ async def get_stream(type: str, id: str):
 
     if type == "series":
         imdb_id, season, episode = id.split(":")
+        season = int(season)
+        episode = int(episode)
+        fb_query = await firebase.queryCollection(
+            "files",
+            [
+                ("imdb_id", "==", imdb_id),
+                ("season", "==", season),
+                ("episodes", "array_contains", episode),
+            ],
+        )
     elif type == "movie":
         imdb_id = id
+        fb_query = await firebase.queryCollection("files", [("imdb_id", "==", imdb_id)])
     else:
         return res
 
-    fb_query = await firebase.queryCollection("metadata", {"imdb_id": imdb_id})
+    fb_query = sorted(fb_query, key=lambda x: x.get("file_size", 0))
 
-    if type == "series":
-        fb_query = sorted(
-            fb_query,
-            key=lambda x: (
-                x.get("episode_code", ""),
-                x.get("file_size", 0),
-            ),
+    for file in fb_query:
+        url = stream.create_stream_url(STREMIO_UID_BYPASS, file["message_id"])
+        ep_code = (
+            utils.build_episode_code(
+                file.get("season", -1),
+                file.get("episode_start", -1),
+                file.get("episode_end", -1),
+            )
+            if type == "series"
+            else ""
         )
-    else:
-        fb_query = sorted(fb_query, key=lambda x: x.get("file_size", 0))
-
-    for metadata in fb_query:
-        url = stream.create_stream_url(STREMIO_UID_BYPASS, metadata["message_id"])
         res["streams"].append(
             {
-                "name": f"ShowHeap {metadata.get('episode_code', '')}".strip(),
+                "name": f"ShowHeap {ep_code}".strip(),
                 "description": "\n".join(
                     x
                     for x in [
                         utils.wrap_str(
-                            metadata["file_name"].replace("_", " ").replace(".", " "),
+                            file["file_name"].replace("_", " ").replace(".", " "),
                             30,
                         ),
-                        utils.format_size(metadata["file_size"]),
+                        utils.format_size(file["file_size"]),
                     ]
                     if x is not None
                 ),

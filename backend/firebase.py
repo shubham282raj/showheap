@@ -146,11 +146,11 @@ async def getDoc(collection, doc):
         return None
 
 
-async def queryCollection(collection, filters: dict):
+async def queryCollection(collection, filters: list):
     ref = db.collection(collection)
 
-    for field, value in filters.items():
-        ref = ref.where(filter=FieldFilter(field, "==", value))
+    for field, comp, value in filters:
+        ref = ref.where(filter=FieldFilter(field, comp, value))
 
     docs = await ref.get()
 
