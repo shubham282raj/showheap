@@ -54,18 +54,17 @@ def clean_multi_search_query(candidates_list: str):
     results = []
 
     for item in candidates_list:
-        title = item.get("title") or item.get("name")
-        release_date = item.get("release_date") or item.get("first_air_date")
+        reduced_item = {
+            "id": item.get("id"),
+            "title": item.get("title") or item.get("name"),
+            "original_title": item.get("original_title") or item.get("original_name"),
+            "original_language": item.get("original_language"),
+            "release_date": item.get("release_date") or item.get("first_air_date"),
+            "media_type": item.get("media_type"),
+        }
 
-        if title:  # avoid empty entries
-            results.append(
-                {
-                    "title": title,
-                    "id": item.get("id"),
-                    "release_date": release_date,
-                    "media_type": item.get("media_type"),
-                }
-            )
+        if reduced_item["title"] or reduced_item["original_title"]:
+            results.append(reduced_item)
 
     return results
 
@@ -79,9 +78,6 @@ def filter_content(candidates_list: list, tmdbID: int):
 
 
 def extract_season_info(show_details: dict):
-    total_seasons = show_details.get("number_of_seasons")
-    total_episodes = show_details.get("number_of_episodes")
-
     season_data = []
 
     for season in show_details.get("seasons", []):
@@ -94,8 +90,8 @@ def extract_season_info(show_details: dict):
 
     return {
         "name": show_details.get("name"),
-        "total_seasons": total_seasons,
-        "total_episodes": total_episodes,
+        "total_seasons": show_details.get("number_of_seasons"),
+        "total_episodes": show_details.get("number_of_episodes"),
         "seasons": season_data,
     }
 

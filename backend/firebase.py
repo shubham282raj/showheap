@@ -4,7 +4,6 @@ from firebase_admin.firestore import SERVER_TIMESTAMP
 from google.cloud.firestore_v1.base_query import FieldFilter
 import logging
 from fastapi import Request, HTTPException
-import utils
 import json
 import env
 
@@ -16,59 +15,38 @@ db = firestore_async.client()
 
 class showDB:
     @staticmethod
-    async def save_content(show_details: dict, metadata: dict):
+    async def save_content(show: dict, metadata: dict):
 
         batch = db.batch()
 
-        content_doc_id = f"{metadata['media_type']}_{show_details['id']}"
-        content_ref = db.collection("content").document(content_doc_id)
-        metadata_ref = db.collection("metadata").document(str(metadata["file_id"]))
+        content_doc_id = f"{metadata['media_type']}_{show['id']}"
+        content_ref = db.collection("shows").document(content_doc_id)
+        metadata_ref = db.collection("files").document(str(metadata["file_id"]))
 
-        content_data = {
-            "tmdb_id": show_details["id"],
-            "name": show_details.get("title") or show_details.get("name"),
-            "lower_name": f"{show_details.get("title") or show_details.get("name")}".lower(),
-            "media_type": metadata["media_type"],
-            "poster_path": show_details.get("poster_path"),
-            "backdrop_path": show_details.get("backdrop_path"),
-            "updated_at": SERVER_TIMESTAMP,
-        }
+        show["title"] = show.get("title") or show.get("name") or ""
+        show["lower_name"] = show["title"].lower()
+        show.pop("name", None)
+        show["original_title"] = show.get("original_title") or show.get("original_name")
+        show.pop("original_name", None)
+
+        show["tmdb_id"] = show["id"]
+        show["media_type"] = metadata["media_type"]
 
         # new content   : create content document
         # content exists: update update_at filed (or any changed field)
-        batch.set(content_ref, content_data, merge=True)
+        show["updated_at"] = SERVER_TIMESTAMP
+        batch.set(content_ref, show, merge=True)
 
         # add/update metadata
         metadata["updated_at"] = SERVER_TIMESTAMP
         batch.set(metadata_ref, metadata, merge=True)
-
-        encoded_file_id = utils.FPE.encode_string(str(metadata["file_id"]))
-
-        # MOVIE
-        if metadata["media_type"] == "movie":
-            batch.update(
-                content_ref,
-                {
-                    f"files.{encoded_file_id}": metadata["file_name"],
-                },
-            )
-        # TV
-        elif metadata["media_type"] == "tv":
-            batch.update(
-                content_ref,
-                {
-                    f"files.{metadata['episode_code']}.{encoded_file_id}": metadata[
-                        "file_name"
-                    ],
-                },
-            )
 
         await batch.commit()
 
     @staticmethod
     async def getMetadata(fileID: str | int):
         try:
-            doc = await db.collection("metadata").document(str(fileID)).get()
+            doc = await db.collection("files").document(str(fileID)).get()
             return doc.to_dict() if doc.exists else None
         except Exception as e:
             logging.error(e)
@@ -79,9 +57,7 @@ class showDB:
     @staticmethod
     async def getContent(media_type: str, tmdb_id: str | int):
         try:
-            doc = (
-                await db.collection("content").document(f"{media_type}_{tmdb_id}").get()
-            )
+            doc = await db.collection("shows").document(f"{media_type}_{tmdb_id}").get()
             return doc.to_dict() if doc.exists else None
         except Exception as e:
             logging.error(e)

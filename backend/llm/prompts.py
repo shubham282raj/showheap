@@ -190,27 +190,29 @@ Identify season and episode information from the filename.
 Valid output formats (lowercase):
 
 Single episode:
-s04e13
+S04E13
 
 Large episode number:
-s05e234
+S05E234
 
 Episode range:
-s02e45-87
+S02E45-87
 
 Season range:
-s04-s06
+(no need to return episode information in case of multiple seasons clubbed together)
+S04-S06
 
 Full season pack:
-s03
+say, number of episodes are 16 in that season
+S03E01-16
 
 Rules:
-1. Use lowercase format exactly as shown above.
-2. Always prefix season with "s" and episode with "e".
+1. Use uppercase format exactly as shown above.
+2. Always prefix season with "S" and episode with "E".
 3. Season and episode numbers may be any length (no forced padding).
-4. If multiple episodes are combined, use episode range (example: s01e01-05).
-5. If multiple seasons are combined, use season range (example: s02-s04).
-6. If the filename only indicates a full season, return only the season (example: s03).
+4. If multiple episodes are combined, use episode range (example: S01E01-05).
+5. If multiple seasons are combined, use season range (example: S02-S04).
+6. If the filename only indicates a full season, look are the season info and get the number of episodes, return SXXE01-(number_of_episodes_in_season_XX) (example: S03E01-16).
 7. Validate against show information:
    - season must exist
    - episode must not exceed episode_count for that season
@@ -220,25 +222,27 @@ Rules:
 Examples:
 
 Filename: Breaking.Bad.S04E13.1080p.BluRay.x264.mkv
-Output: s04e13
+Output: S04E13
 
 Filename: Naruto.S05E234.720p.WEBRip.mkv
-Output: s05e234
+Output: S05E234
 
 Filename: Show.Name.S02E45-87.1080p.WEBRip.mkv
-Output: s02e45-87
+Output: S02E45-87
 
 Filename: Show.Name.S04-S06.Collection.mkv
-Output: s04-s06
+Output: S04-S06
 
 Filename: Show.Name.Season.03.Complete.1080p.mkv
-Output: s03
+(Take hint from Season Information: if season 3 has 9 episodes)
+Output: S03E01-09
 
-Filename: Random.Video.File.1080p.mkv
-Output: UNKNOWN
+Filename: Prison.Break.1080p.mkv
+(No hint is given => Something is wrong)
+Output: NONE (always fallback to NONE)
 
 Output rules:
-- Return ONLY the extracted result.
+- Return ONLY the extracted result (or fallback NONE).
 - No explanations.
 - No punctuation.
 - Single line only.

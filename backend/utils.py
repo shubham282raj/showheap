@@ -3,6 +3,7 @@ import os
 import pyffx
 import env
 from urllib.parse import quote
+import re
 
 
 class SingletonMeta(type):
@@ -131,3 +132,30 @@ def build_episode_code(season=-1, episode_start=-1, episode_end=-1):
         return f"S{season:02d}E{episode_start:02d}"
 
     return f"S{season:02d}E{episode_start:02d}-{episode_end:02d}"
+
+
+def parse_episode_code(code: str):
+    code = code.strip().upper()
+
+    if code == "NONE":
+        return [], []
+
+    # season range (S04-S06)
+    m = re.match(r"S(\d+)-S(\d+)", code)
+    if m:
+        start, end = map(int, m.groups())
+        seasons = list(range(start, end + 1))
+        return seasons, []  # no episode info
+
+    # episode (single or range)
+    m = re.match(r"S(\d+)E(\d+)(?:-(\d+))?", code)
+    if m:
+        season = int(m.group(1))
+        ep_start = int(m.group(2))
+        ep_end = int(m.group(3)) if m.group(3) else ep_start
+
+        episodes = list(range(ep_start, ep_end + 1))
+        return [season], episodes
+
+    # fallback
+    return [], []

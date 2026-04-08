@@ -1,6 +1,7 @@
 import llm.prompts as prompts
 import tmdb
 import bot.botutils as botutils
+import utils
 
 
 async def fetchMediaDetails(metadata: dict, tglogger: botutils.TGLogger = None):
@@ -72,10 +73,27 @@ async def fetchMediaDetails(metadata: dict, tglogger: botutils.TGLogger = None):
         )
         metadata["episode_code"] = episode_code
 
+        seasons, episodes = utils.parse_episode_code(episode_code)
+
+        if not seasons or not episodes:
+            raise Exception("No Season Info Or Episodes Info could be extracted")
+        elif len(seasons) > 1:
+            raise Exception("Multiple Seasons in one file is not yet suppored")
+
+        metadata["season"] = seasons[0]
+        metadata["episodes"] = episodes
+        metadata["episode_start"] = episodes[0]
+        metadata["episode_end"] = episodes[-1]
+
         tglogger.append(
             {"Episode Code Extracted": f"'{episode_code}'", "LLM Logs": llm_logs},
             delimiter="\n",
         )
+
+    # imdb id
+    external_ids = await tmdb.queryv3(f"{content_type}/{tmdbID}/external_ids")
+    content_details["imdb_id"] = external_ids["imdb_id"]
+    metadata["imdb_id"] = external_ids["imdb_id"]
 
     tglogger.append("WorkFlow Successful: Fetch Media Details", markdown=False)
 
