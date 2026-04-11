@@ -12,6 +12,9 @@ firebase_admin.initialize_app(cred)
 
 db = firestore_async.client()
 
+CONTENT_COLLECTION_NAME = "catalog"
+METADATA_COLLECTION_NAME = "tgfiles"
+
 
 class showDB:
     @staticmethod
@@ -19,18 +22,12 @@ class showDB:
 
         batch = db.batch()
 
-        content_doc_id = f"{metadata['media_type']}_{show['id']}"
-        content_ref = db.collection("shows").document(content_doc_id)
-        metadata_ref = db.collection("files").document(str(metadata["file_id"]))
-
-        show["title"] = show.get("title") or show.get("name") or ""
-        show["lower_name"] = show["title"].lower()
-        show.pop("name", None)
-        show["original_title"] = show.get("original_title") or show.get("original_name")
-        show.pop("original_name", None)
-
-        show["tmdb_id"] = show["id"]
-        show["media_type"] = metadata["media_type"]
+        content_ref = db.collection(CONTENT_COLLECTION_NAME).document(
+            metadata["imdb_id"]
+        )
+        metadata_ref = db.collection(METADATA_COLLECTION_NAME).document(
+            str(metadata["file_id"])
+        )
 
         # new content   : create content document
         # content exists: update update_at filed (or any changed field)
@@ -46,7 +43,11 @@ class showDB:
     @staticmethod
     async def getMetadata(fileID: str | int):
         try:
-            doc = await db.collection("files").document(str(fileID)).get()
+            doc = (
+                await db.collection(METADATA_COLLECTION_NAME)
+                .document(str(fileID))
+                .get()
+            )
             return doc.to_dict() if doc.exists else None
         except Exception as e:
             logging.error(e)
@@ -55,9 +56,13 @@ class showDB:
             )
 
     @staticmethod
-    async def getContent(media_type: str, tmdb_id: str | int):
+    async def getContent(imdb_id: str):
         try:
-            doc = await db.collection("shows").document(f"{media_type}_{tmdb_id}").get()
+            doc = (
+                await db.collection(CONTENT_COLLECTION_NAME)
+                .document(f"{imdb_id}")
+                .get()
+            )
             return doc.to_dict() if doc.exists else None
         except Exception as e:
             logging.error(e)
@@ -118,7 +123,7 @@ async def getDoc(collection, doc):
             return None
 
     except Exception as e:
-        print(f"Error fetching document: {e}")
+        logging.error(f"Error fetching document: {e}")
         return None
 
 

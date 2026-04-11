@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 import firebase
 import utils
 import stream
@@ -19,7 +19,7 @@ def get_manifest():
         "resources": ["stream"],
         "catalogs": [
             {"type": "movie", "id": "movie", "name": "ShowHeap"},
-            {"type": "series", "id": "tv", "name": "ShowHeap"},
+            {"type": "series", "id": "series", "name": "ShowHeap"},
         ],
         "idPrefixes": ["tt"],
     }
@@ -28,12 +28,11 @@ def get_manifest():
 
 @router.get("/catalog/{type}/{id}.json")
 async def get_catalog(type: str, id: str, skip: int = 0):
-
     PAGE_SIZE = 100
 
     query = (
-        firebase.db.collection("shows")
-        .where(filter=firebase.FieldFilter("media_type", "==", id))
+        firebase.db.collection(firebase.CONTENT_COLLECTION_NAME)
+        .where(filter=firebase.FieldFilter("media_type", "==", type))
         .order_by("updated_at", direction="DESCENDING")
         .limit(skip + PAGE_SIZE)
     )
@@ -46,34 +45,14 @@ async def get_catalog(type: str, id: str, skip: int = 0):
         d = doc.to_dict()
         metas.append(
             {
-                "id": d.get("imdb_id", "tmdb_" + str(d["tmdb_id"])),
+                "id": d["imdb_id"],
                 "type": type,
-                "name": d["title"],
-                "poster": f"https://image.tmdb.org/t/p/w500{d.get('poster_path')}",
+                "name": d["name"],
+                "poster": d["poster"],
             }
         )
 
     return {"metas": metas}
-
-
-# TODO
-
-# @router.get("/meta/{type}/{id}.json")
-# async def get_meta(type: str, id: str):
-#     # lets only handle tmdb meta
-#     if not id.startswith("tmdb_") or type not in ["series", "movie"]:
-#         return {"meta": None}
-
-#     type = "tv" if type == "series" else "movie"
-
-#     tmdb_id = int(id.replace("tmdb_", ""))
-
-#     doc = await firebase.getDoc("content", f"{type}_{tmdb_id}")
-
-#     if not doc:
-#         return {"meta": None}
-
-#     d = doc[0].to_dict()
 
 
 @router.get("/stream/{type}/{id}.json")
@@ -85,7 +64,7 @@ async def get_stream(type: str, id: str):
         season = int(season)
         episode = int(episode)
         fb_query = await firebase.queryCollection(
-            "files",
+            firebase.METADATA_COLLECTION_NAME,
             [
                 ("imdb_id", "==", imdb_id),
                 ("season", "==", season),
@@ -94,7 +73,9 @@ async def get_stream(type: str, id: str):
         )
     elif type == "movie":
         imdb_id = id
-        fb_query = await firebase.queryCollection("files", [("imdb_id", "==", imdb_id)])
+        fb_query = await firebase.queryCollection(
+            firebase.METADATA_COLLECTION_NAME, [("imdb_id", "==", imdb_id)]
+        )
     else:
         return res
 
@@ -130,3 +111,9 @@ async def get_stream(type: str, id: str):
         )
 
     return res
+
+
+@router.get("/share/{media_type}/{imdb_id}")
+async def share_redirect(media_type: str, imdb_id: str):
+    stremio_url = f"stremio:///detail/{media_type}/{imdb_id}"
+    return RedirectResponse(url=stremio_url)

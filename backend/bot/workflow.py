@@ -102,9 +102,7 @@ class ToShowDBWF:
             message_id = metadata["message_id"]
 
             if await botutils.message_exists(channel_id, message_id):
-                content = await firebase.showDB.getContent(
-                    metadata["media_type"], metadata["tmdb_id"]
-                )
+                content = await firebase.showDB.getContent(metadata["imdb_id"])
                 if content:
                     await self.replySuccessFileWF(content, metadata)
                     return True
@@ -113,24 +111,31 @@ class ToShowDBWF:
 
     async def replySuccessFileWF(self, content, metadata):
         caption = f"""
-🎬 <b>{content.get('title') or content.get('name')}</b>
-🎭 <b>Type:</b> {metadata['media_type'].title()}
+<b>{content.get('title') or content.get('name')}</b> ({metadata['media_type'].title()}) {f"\n<b>{metadata['episode_code']}</b>" if "episode_code" in metadata else ""}
+{content.get("description")}
+<b>Genre:</b> {", ".join(content.get("genre", []))}
 
-📂 <b>File:</b> {metadata['file_name']}
-💾 <b>Size:</b> {utils.format_size(metadata['file_size'])}
+{metadata['file_name']}
+{utils.format_size(metadata['file_size'])}
         """
 
-        poster_url = f"https://image.tmdb.org/t/p/w500{content['poster_path']}"
+        poster_url = content.get("poster") + ".jpg"
 
         buttons = [
             [
                 Button.url(
-                    "TMDB",
-                    f"https://www.themoviedb.org/{metadata.get("media_type")}/{metadata.get("tmdb_id")}",
+                    "IMDB",
+                    f"https://www.imdb.com/title/{metadata.get("imdb_id")}",
+                ),
+            ],
+            [
+                Button.url(
+                    "Stremio Web",
+                    f"https://web.stremio.com/#/detail/{metadata.get("media_type")}/{metadata.get("imdb_id")}",
                 ),
                 Button.url(
-                    "ShowHeap",
-                    f"{env.FRONTEND_URL}/content/{metadata.get("media_type")}/{metadata.get("tmdb_id")}",
+                    "Stremio App",
+                    f"{env.BASE_URL}/stremio/share/{metadata.get("media_type")}/{metadata.get("imdb_id")}",
                 ),
             ],
         ]
@@ -140,7 +145,7 @@ class ToShowDBWF:
                 "Sent File Details": {
                     "title": content.get("title") or content.get("name"),
                     "type": metadata["media_type"],
-                    "tmdb_id": metadata.get("tmdb_id"),
+                    "imdb_id": metadata.get("imdb_id"),
                 }
             }
         )
@@ -148,7 +153,7 @@ class ToShowDBWF:
         try:
             await self.event.reply(
                 caption,
-                file=poster_url if content.get("poster_path") else None,
+                file=poster_url,
                 parse_mode="html",
                 buttons=buttons,
             )
@@ -156,6 +161,6 @@ class ToShowDBWF:
             # try sending without the buttons in case of a crash
             await self.event.reply(
                 caption,
-                file=poster_url if content.get("poster_path") else None,
+                file=poster_url,
                 parse_mode="html",
             )

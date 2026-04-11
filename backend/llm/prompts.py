@@ -38,148 +38,103 @@ Answer:
     return responsetxt, logs
 
 
-async def get_tmdb_id(
-    filename: str, show_name: str, description: str, candidates: list
-):
+async def get_imdb_id(filename: str, description: str, candidates: list):
     prompt = f"""
-You are selecting the best matching TMDB entry.
+You are selecting the best matching IMDb entry.
 
 Inputs:
-
 Filename:
 {filename}
-
-Extracted Show Name:
-{show_name}
 
 Description:
 {description}
 
-Candidate Entries (each has: title, id, release_date, media_type):
+Candidates (name, imdb_id, year, type):
 {candidates}
 
 
 Task:
-Pick the SINGLE best matching entry.
+Pick the SINGLE best match.
 
-
-Matching Strategy (VERY IMPORTANT):
+Matching Strategy:
 
 1. TITLE MATCH (highest priority)
-   - Prefer exact or near-exact matches with the extracted show name.
-   - Ignore differences in punctuation, dots, casing.
-   - Example: "Breaking.Bad" → "Breaking Bad"
+   - Prefer exact or close match with filename
+   - Ignore dots, casing, punctuation
+   - Example: "The.Boys" → "The Boys"
 
-2. MEDIA TYPE MATCH
-   - Determine whether the content is a MOVIE or TV show using clues:
-     • TV clues → S01E01, Season, Episode, multi-episode, "Complete Season"
-     • Movie clues → year (e.g., 2019), no episode pattern, "BluRay", "WEB-DL"
-   - Match this with candidate.media_type ("tv" or "movie").
-   - Strongly prefer correct media type over title similarity if conflict exists.
+2. TYPE MATCH
+   - Detect MOVIE vs SERIES:
+     • TV clues → S01E01, Season, Episode
+     • Movie clues → year, BluRay, WEB-DL
+   - Must match candidate.type ("movie" or "series")
+   - If type mismatches → reject
 
-3. RELEASE DATE VALIDATION
-   - Extract year hints from filename or description.
-     Examples:
-       "The.Dark.Knight.2008" → 2008
-       "Avatar.2022" → 2022
-   - Compare with candidate.release_date.
-   - Prefer candidates with matching or very close year.
+3. YEAR MATCH
+   - Extract year from filename/description
+   - Match with candidate.year
+   - For series: use start year ("2019-2026" → 2019)
 
-4. DESCRIPTION CONTEXT
-   - Use description to disambiguate remakes, sequels, or similarly named titles.
+4. DESCRIPTION
+   - Use to resolve remakes/sequels
 
-5. IGNORE:
-   - Resolution (1080p, 720p)
-   - Codec (x264, HEVC)
-   - Release groups
-   - File extensions
+5. GENRES (weak signal)
+   - Only for tie-breaking
+
+
+Ignore:
+resolution, codec, release group, extensions
 
 
 Decision Rules:
+- Choose best match (title + type + year)
+- If multiple → use year
+- If no reasonable match → return None
+- Do NOT force a match
 
-- Choose the candidate that best satisfies ALL:
-  title similarity + correct media_type + matching release year.
-- If title matches but media_type is wrong → REJECT.
-- If multiple titles match → use release_date to decide.
-- If still ambiguous → pick the closest overall match.
-- If NONE of the candidates reasonably match the title → return -1.
-- Do NOT force a match if title similarity is low or unrelated.
 
 Output Rules:
-
-- Return ONLY the numerical id.
-- No explanation.
-- No text.
-- No formatting.
-- Single line only.
-
-
-Examples:
+- Return ONLY imdb_id (e.g., tt1234567) or none
+- No explanation, no extra text
 
 Example 1:
-Filename: Breaking.Bad.S04E13.1080p.mkv
-Show Name: Breaking Bad
+Filename: Breaking.Bad.S04E13.Face.Off.1080p.BluRay.x264.mkv
 Candidates:
 [
-  {{ "title": "Breaking Bad", "id": 1396, "release_date": "2008-01-20", "media_type": "tv" }},
-  {{ "title": "Breaking Bad Movie", "id": 9999, "release_date": "2015-01-01", "media_type": "movie" }}
+  {{ "name": "Breaking Bad", "imdb_id": "tt0903747", "year": "2008-2013", "type": "series" }},
+  {{ "name": "Breaking Bad Movie", "imdb_id": "tt1234567", "year": "2015", "type": "movie" }}
 ]
 Output:
-1396
+tt0903747
 
 
 Example 2:
-Filename: The.Dark.Knight.2008.1080p.BluRay.mkv
-Show Name: The Dark Knight
+Filename: The.Dark.Knight.2008.IMAX.1080p.BluRay.mkv
 Candidates:
 [
-  {{ "title": "The Dark Knight", "id": 155, "release_date": "2008-07-18", "media_type": "movie" }},
-  {{ "title": "The Dark Knight Returns", "id": 49026, "release_date": "2012-09-25", "media_type": "movie" }}
+  {{ "name": "The Dark Knight", "imdb_id": "tt0468569", "year": "2008", "type": "movie" }},
+  {{ "name": "The Dark Knight Returns", "imdb_id": "tt2313197", "year": "2012", "type": "movie" }}
 ]
 Output:
-155
+tt0468569
 
 
 Example 3:
-Filename: The.Office.US.S02E03.mkv
-Show Name: The Office
+Filename: Dune.Part.Two.2024.1080p.WEBRip.mkv
 Candidates:
 [
-  {{ "title": "The Office", "id": 2316, "release_date": "2005-03-24", "media_type": "tv" }},
-  {{ "title": "The Office", "id": 10429, "release_date": "1995-07-01", "media_type": "tv" }}
+  {{ "name": "The Office", "imdb_id": "tt0386676", "year": "2005–2013", "type": "series" }},
+  {{ "name": "The Office", "imdb_id": "tt0290978", "year": "2001–2003", "type": "series" }}
 ]
 Output:
-2316
+None
 
-
-Example 4:
-Filename: Avatar.2009.1080p.mkv
-Show Name: Avatar
-Candidates:
-[
-  {{ "title": "Avatar", "id": 19995, "release_date": "2009-12-18", "media_type": "movie" }},
-  {{ "title": "Avatar: The Last Airbender", "id": 246, "release_date": "2005-02-21", "media_type": "tv" }}
-]
-Output:
-19995
-
-Example 5 (No Match → Fallback):
-Filename: The.Walking.Dead.2023.1080p.mkv
-Show Name: The Walking Dead
-Candidates:
-[
-  {{ "title": "Inception", "id": 27205, "release_date": "2010-07-16", "media_type": "movie" }},
-  {{ "title": "Interstellar", "id": 157336, "release_date": "2014-11-07", "media_type": "movie" }}
-]
-Output:
--1
 
 Answer:
 """
 
     responsetxt, logs = await dispatcher.submit(prompt)
-
-    return responsetxt.strip(), logs
+    return responsetxt.strip().lower(), logs
 
 
 async def extract_episode(filename: str, description: str, season_info: dict):
