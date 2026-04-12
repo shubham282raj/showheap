@@ -53,11 +53,11 @@ export const router = createBrowserRouter([
             element: <Home />,
           },
           {
-            path: "content/:media_type/:tmdb_id",
+            path: "content/:media_type/:imdb_id",
             element: <Content />,
           },
           {
-            path: "watch/:media_type/:tmdb_id/:encoded_metadata_id",
+            path: "watch/:media_type/:imdb_id/:file_id",
             element: <Watch />,
           },
           {

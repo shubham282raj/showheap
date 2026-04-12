@@ -21,8 +21,7 @@ export default function FileMetadata(props) {
   const navigate = useNavigate();
   const params = useParams();
 
-  const encoded_metadata_id =
-    props.encoded_metadata_id || params.encoded_metadata_id;
+  const file_id = props.file_id || params.file_id;
 
   const {
     data: { metadata: data, stream_url: streamingLink },
@@ -30,11 +29,11 @@ export default function FileMetadata(props) {
     isError,
     error,
   } = useQuery({
-    queryKey: ["file", encoded_metadata_id],
-    queryFn: () => fetchStreamingLink(encoded_metadata_id),
+    queryKey: ["file", file_id],
+    queryFn: () => fetchStreamingLink(file_id),
   });
 
-  if (!encoded_metadata_id) return <div>Invalid Route</div>;
+  if (!file_id) return <div>Invalid Route</div>;
 
   if (isLoading) return <LoadingContainer />;
 
@@ -56,7 +55,7 @@ export default function FileMetadata(props) {
         <Button
           className="p-0 border-0 bg-transparent"
           onClick={() =>
-            navigate(`/content/${data.media_type}/${data.tmdb_id}`)
+            navigate(`/content/${data.media_type}/${data.imdb_id}`)
           }
         >
           <Card.Header className="border-0">

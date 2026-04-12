@@ -1,79 +1,165 @@
-import { Container, Card, ListGroup } from "react-bootstrap";
+import { ListGroup, Container, Card } from "react-bootstrap";
 import { ChevronRight } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { getMetadata, METADATA_COLLECTION_NAME } from "../apis/firebase";
+import { LoadingContainer } from "./Loader";
+import { formatBytes } from "../utils/format";
 
-export function ListFiles({ files }) {
-  const { media_type, tmdb_id } = useParams();
-
-  const sortedFiles = Object.entries(files).sort((a, b) =>
-    a[1].localeCompare(b[1], undefined, { sensitivity: "base" }),
-  );
+export function MovieFiles({ files }) {
+  const { media_type, imdb_id } = useParams();
 
   return (
     <ListGroup variant="flush">
-      {sortedFiles.map(([fileId, fileName]) => (
-        <ListGroup.Item
-          key={fileId}
-          className="d-flex justify-content-between align-items-center p-0 border-0 bg-transparent"
-        >
-          <Link
-            to={`/watch/${media_type}/${tmdb_id}/${fileId}`}
-            className="text-decoration-none w-100 py-2 px-3 d-flex align-items-center link-warning"
-            title={fileName}
+      {files
+        .sort((a, b) => b.file_size - a.file_size)
+        .map((file) => (
+          <ListGroup.Item
+            key={file.file_id}
+            className="d-flex justify-content-between align-items-center p-0 border-0 bg-transparent"
           >
-            <div
-              className="flex-grow-1 text-truncate me-2"
-              style={{
-                fontSize: "0.9rem",
-                color: "var(--bs-list-group-color)",
-                minWidth: 0,
-              }}
+            <Link
+              to={`/watch/${media_type}/${imdb_id}/${file.id}`}
+              className="text-decoration-none w-100 py-2 px-3 d-flex align-items-center link-warning"
+              title={file.file_name}
             >
-              {fileName}
-            </div>
+              <div
+                className="flex-grow-1 me-2 ms-3 d-flex justify-content-between"
+                style={{
+                  fontSize: "0.9rem",
+                  color: "var(--bs-list-group-color)",
+                  minWidth: 0,
+                }}
+              >
+                <span className="text-truncate">{file.file_name}</span>
+                <span className="ps-2" style={{ whiteSpace: "nowrap" }}>
+                  {formatBytes(file.file_size)}
+                </span>
+              </div>
 
-            <ChevronRight
-              strokeWidth={3}
-              className="flex-shrink-0"
-              color="var(--bs-primary)"
-            />
-          </Link>
-        </ListGroup.Item>
-      ))}
+              <ChevronRight
+                strokeWidth={3}
+                className="flex-shrink-0"
+                color="var(--bs-primary)"
+              />
+            </Link>
+          </ListGroup.Item>
+        ))}
     </ListGroup>
   );
 }
 
-export default function ListFileSection({ fileGroup }) {
-  // Normalize keys to uppercase
-  const normalized = {};
+export function SeriesFiles({ files }) {
+  const { media_type, imdb_id } = useParams();
 
-  Object.entries(fileGroup).forEach(([header, files]) => {
-    const key = header.toUpperCase();
+  return (
+    <>
+      {Object.keys(files)
+        .sort((a, b) => {
+          const ea = Number(a.replace("Episode ", ""));
+          const eb = Number(b.replace("Episode ", ""));
+          return ea - eb;
+        })
+        .map((episode) => (
+          <div key={episode}>
+            <div
+              className="px-3 py-1 text-secondary"
+              style={{ fontSize: "0.85rem" }}
+            >
+              {episode}
+            </div>
 
-    if (!normalized[key]) normalized[key] = {};
-    Object.assign(normalized[key], files);
+            <ListGroup variant="flush">
+              {files[episode]
+                .sort((a, b) => b.file_size - a.file_size)
+                .map((file) => (
+                  <ListGroup.Item
+                    key={file.id}
+                    className="d-flex justify-content-between align-items-center p-0 border-0 bg-transparent"
+                  >
+                    <Link
+                      to={`/watch/${media_type}/${imdb_id}/${file.id}`}
+                      className="text-decoration-none w-100 py-2 px-3 d-flex align-items-center link-warning"
+                      title={file.file_name}
+                    >
+                      <div
+                        className="flex-grow-1 me-2 ms-3 d-flex justify-content-between"
+                        style={{
+                          fontSize: "0.9rem",
+                          color: "var(--bs-list-group-color)",
+                          minWidth: 0,
+                        }}
+                      >
+                        <span className="text-truncate">{file.file_name}</span>
+                        <span className="ps-2" style={{ whiteSpace: "nowrap" }}>
+                          {formatBytes(file.file_size)}
+                        </span>
+                      </div>
+
+                      <ChevronRight
+                        strokeWidth={3}
+                        className="flex-shrink-0"
+                        color="var(--bs-primary)"
+                      />
+                    </Link>
+                  </ListGroup.Item>
+                ))}
+            </ListGroup>
+          </div>
+        ))}
+    </>
+  );
+}
+
+export default function ListFileSection() {
+  const { media_type, imdb_id } = useParams();
+
+  const {
+    data: content,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: [METADATA_COLLECTION_NAME, media_type, imdb_id],
+    enabled: !!media_type && !!imdb_id,
+    queryFn: () => getMetadata(imdb_id),
   });
 
-  const sortedGroups = Object.entries(normalized).sort((a, b) =>
-    a[0].localeCompare(b[0]),
-  );
+  if (isLoading) return <LoadingContainer />;
+
+  if (isError)
+    return (
+      <Container>
+        <div className="text-center">{error.message}</div>
+      </Container>
+    );
 
   return (
     <Container className="my-4">
-      {sortedGroups.map(([header, files]) => (
-        <Card
-          key={header}
-          className="mb-3 shadow shadow-lg border-0 bg-white"
-          style={{ "--bs-bg-opacity": "0.03" }}
-        >
-          <Card.Header className="border-0 text-primary">
-            <strong>{header}</strong>
-          </Card.Header>
+      {Object.keys(content)
+        .sort()
+        .map((key) => {
+          const value = content[key];
+          const isMovie = Array.isArray(value);
 
-          <ListFiles files={files} />
-        </Card>
-      ))}
+          return (
+            <Card
+              key={key}
+              className="mb-3 shadow shadow-lg border-0 bg-white"
+              style={{ "--bs-bg-opacity": "0.03" }}
+            >
+              <Card.Header className="border-0 text-primary">
+                <strong>{key}</strong>
+              </Card.Header>
+
+              {isMovie ? (
+                <MovieFiles files={value} />
+              ) : (
+                <SeriesFiles files={value} />
+              )}
+            </Card>
+          );
+        })}
     </Container>
   );
 }

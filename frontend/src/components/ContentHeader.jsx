@@ -1,11 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { Container, Card, Badge, Image } from "react-bootstrap";
-import { getContent } from "../apis/firebase";
+import { CONTENT_COLLECTION_NAME, getContent } from "../apis/firebase";
 import { useParams } from "react-router-dom";
-import { getTmdbImageUrl } from "../utils/link";
 
 export default function ContentHeader() {
-  const { media_type, tmdb_id } = useParams();
+  const { media_type, imdb_id } = useParams();
 
   const {
     data: content,
@@ -13,9 +12,9 @@ export default function ContentHeader() {
     isError,
     error,
   } = useQuery({
-    queryKey: ["content", media_type, tmdb_id],
-    enabled: !!media_type && !!tmdb_id,
-    queryFn: () => getContent(media_type, tmdb_id),
+    queryKey: [CONTENT_COLLECTION_NAME, media_type, imdb_id],
+    enabled: !!media_type && !!imdb_id,
+    queryFn: () => getContent(imdb_id),
   });
 
   if (isLoading) return <></>;
@@ -25,7 +24,7 @@ export default function ContentHeader() {
   return (
     <Card className="shadow position-relative text-white w-100 h-100 border-0 overflow-hidden user-select-none">
       <Card.Img
-        src={getTmdbImageUrl(content.backdrop_path)}
+        src={content.background}
         className="object-fit-cover h-100 w-100"
         style={{ aspectRatio: 16 / 9 }}
       />
@@ -41,7 +40,7 @@ export default function ContentHeader() {
         <div className="w-100 h-100 m-0 d-flex justify-content-between align-items-end">
           <Container className="h-100 w-auto p-2 m-0">
             <Image
-              src={getTmdbImageUrl(content.poster_path)}
+              src={content.poster.replace("small", "big")}
               className="h-100 w-auto p-0 rounded-2"
             ></Image>
           </Container>

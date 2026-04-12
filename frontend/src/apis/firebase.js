@@ -15,18 +15,60 @@ import {
   runTransaction,
 } from "firebase/firestore";
 
-export const getContent = async (media_type, tmdb_id) => {
-  const ref = doc(db, "content", `${media_type}_${tmdb_id}`);
+export const CONTENT_COLLECTION_NAME = "catalog";
+export const METADATA_COLLECTION_NAME = "tgfiles";
+
+export const getContent = async (imdb_id) => {
+  const ref = doc(db, CONTENT_COLLECTION_NAME, imdb_id);
   const snap = await getDoc(ref);
   if (!snap.exists()) throw new Error("Media Not Found in database");
   return snap.data();
 };
 
-export const getMetadata = async (file_id) => {
-  const ref = doc(db, "metadata", file_id);
-  const snap = await getDoc(ref);
-  if (!snap.exists()) throw new Error("Not found");
-  return snap.data();
+export const getMetadata = async (imdb_id) => {
+  const q = query(
+    collection(db, METADATA_COLLECTION_NAME),
+    where("imdb_id", "==", imdb_id),
+  );
+  const snap = await getDocs(q);
+  if (snap.empty) throw new Error("Not found");
+
+  const data = snap.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  }));
+
+  console.log(data.length, "files found");
+
+  const result = {};
+
+  data.forEach((item) => {
+    // MOVIE CASE
+    if (item.media_type === "movie") {
+      if (!result["Files"]) result["Files"] = [];
+      result["Files"].push(item);
+      return;
+    }
+
+    // SERIES CASE
+    const season = `Season ${item.season}`;
+
+    if (!result[season]) {
+      result[season] = {};
+    }
+
+    item.episodes.forEach((ep) => {
+      const episode = `Episode ${ep}`;
+
+      if (!result[season][episode]) {
+        result[season][episode] = [];
+      }
+
+      result[season][episode].push(item);
+    });
+  });
+
+  return result;
 };
 
 export const fetchContent = async (lastVisibleDoc, PAGE_SIZE = 12) => {
@@ -34,14 +76,14 @@ export const fetchContent = async (lastVisibleDoc, PAGE_SIZE = 12) => {
 
   if (lastVisibleDoc) {
     q = query(
-      collection(db, "content"),
+      collection(db, CONTENT_COLLECTION_NAME),
       orderBy("updated_at", "desc"),
       startAfter(lastVisibleDoc),
       limit(PAGE_SIZE),
     );
   } else {
     q = query(
-      collection(db, "content"),
+      collection(db, CONTENT_COLLECTION_NAME),
       orderBy("updated_at", "desc"),
       limit(PAGE_SIZE),
     );
@@ -60,7 +102,7 @@ export const fetchContent = async (lastVisibleDoc, PAGE_SIZE = 12) => {
 
 export const searchContentByName = async (name) => {
   const q = query(
-    collection(db, "content"),
+    collection(db, CONTENT_COLLECTION_NAME),
     where("lower_name", ">=", name),
     where("lower_name", "<=", name + "\uf8ff"),
     limit(20),

@@ -4,6 +4,7 @@ import datetime
 import firebase
 import httpx
 import utils
+import asyncio
 from fastapi import HTTPException, Request, Depends, APIRouter
 from fastapi.responses import StreamingResponse, Response
 
@@ -77,13 +78,15 @@ async def ping_go():
 async def getStreamURL(
     encoded_metadata_id: str, request: Request, user=Depends(firebase.verify_user)
 ):
-    metadata_id = utils.FPE.decode_string(encoded_metadata_id)
+    imdb_id = utils.FPE.decode_string(encoded_metadata_id)
     user_uid = request.state.user.get("uid")
 
-    if not await firebase.isShowHeapAllowedUser(user_uid):
-        raise HTTPException(status_code=401, detail="permission-denied")
+    is_allowed, metadata = await asyncio.gather(
+        firebase.isShowHeapAllowedUser(user_uid), firebase.showDB.getMetadata(imdb_id)
+    )
 
-    metadata = await firebase.showDB.getMetadata(metadata_id)
+    if not is_allowed:
+        raise HTTPException(status_code=401, detail="permission-denied")
 
     if not metadata:
         raise HTTPException(status_code=404, detail="File not found")
@@ -94,8 +97,10 @@ async def getStreamURL(
 
     data = {
         "media_type": metadata.get("media_type"),
-        "tmdb_id": metadata.get("tmdb_id"),
+        "imdb_id": metadata.get("imdb_id"),
         "episode_code": metadata.get("episode_code"),
+        "episodes": metadata.get("episodes"),
+        "season": metadata.get("season"),
         "file_name": metadata.get("file_name"),
         "file_size": metadata.get("file_size"),
         "updated_at": (

@@ -4,7 +4,7 @@ import { getCollectionCounts } from "../apis/firebase";
 export default function DBCount() {
   const { data: [contentCount, metadataCount] = [], isSuccess } = useQuery({
     queryKey: ["dbcount"],
-    queryFn: () => getCollectionCounts(["content", "metadata"]),
+    queryFn: () => getCollectionCounts(["files"]),
   });
 
   if (!isSuccess) return null;

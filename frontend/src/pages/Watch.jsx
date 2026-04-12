@@ -8,11 +8,11 @@ import { LoadingContainer } from "../components/Loader";
 import PermissionDenied from "../components/PermissionDenied";
 
 export default function Watch() {
-  const { media_type, tmdb_id, encoded_metadata_id } = useParams();
+  const { media_type, imdb_id, file_id } = useParams();
 
   const { data, isLoading, isError, isSuccess, error } = useQuery({
-    queryKey: ["file", encoded_metadata_id],
-    queryFn: () => fetchStreamingLink(encoded_metadata_id),
+    queryKey: ["file", file_id],
+    queryFn: () => fetchStreamingLink(file_id),
   });
 
   if (isLoading) return <LoadingContainer />;
@@ -28,7 +28,7 @@ export default function Watch() {
 
   if (
     isSuccess &&
-    (data.metadata.media_type != media_type || data.metadata.tmdb_id != tmdb_id)
+    (data.metadata.media_type != media_type || data.metadata.imdb_id != imdb_id)
   )
     return (
       <Container>
