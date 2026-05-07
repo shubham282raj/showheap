@@ -8,7 +8,6 @@ import asyncio
 from fastapi import HTTPException, Request, Depends, APIRouter
 from fastapi.responses import StreamingResponse, Response
 
-
 PORT = int(env.PORT)
 BASE_URL = env.BASE_URL
 TGFS_PROXY_URL = env.TGFS_PROXY_URL
@@ -44,9 +43,8 @@ def verify_stream_token(token: str):
         return None
 
 
-def create_stream_url(uid, message_id):
-    token = create_stream_token(uid=uid, message_id=str(message_id))
-    stream_url = f"{BASE_URL}/stream/{message_id}{f"?token={token}" if token else ""}"
+def create_stream_url(metadata):
+    stream_url = f"{BASE_URL}/stream/{metadata.get("message_id")}?hash={str(metadata.get("file_hash"))[:6]}"
     return stream_url
 
 
@@ -91,9 +89,7 @@ async def getStreamURL(
     if not metadata:
         raise HTTPException(status_code=404, detail="File not found")
 
-    message_id = metadata["message_id"]
-
-    stream_url = create_stream_url(user_uid, message_id)
+    stream_url = create_stream_url(metadata)
 
     data = {
         "media_type": metadata.get("media_type"),

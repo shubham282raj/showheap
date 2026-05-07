@@ -82,7 +82,7 @@ async def get_stream(type: str, id: str):
     fb_query = sorted(fb_query, key=lambda x: x.get("file_size", 0))
 
     for file in fb_query:
-        url = stream.create_stream_url(STREMIO_UID_BYPASS, file["message_id"])
+        url = stream.create_stream_url(file)
         ep_code = (
             utils.build_episode_code(
                 file.get("season", -1),
