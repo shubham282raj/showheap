@@ -11,15 +11,12 @@ async def fetchMediaDetails(metadata: dict, tglogger: botutils.TGLogger = None):
 
     tglogger.append({"File Name": metadata["file_name"]})
 
-    # get catalog
-    catalog = await cinemeta.get_all_catalog(metadata["file_name"])
-
-    if not catalog:
-        extracted_name, llm_logs = await prompts.extract_movie_name(
-            metadata["file_name"], metadata["description"]
-        )
-        tglogger.append({"Extracted Name": f"'{extracted_name}'", "LLM Logs": llm_logs})
-        catalog = await cinemeta.get_all_catalog(extracted_name)
+    # extract name and get catalog
+    extracted_name, llm_logs = await prompts.extract_movie_name(
+        metadata["file_name"], metadata["description"]
+    )
+    tglogger.append({"Extracted Name": f"'{extracted_name}'", "LLM Logs": llm_logs})
+    catalog = await cinemeta.get_all_catalog(extracted_name)
 
     if not catalog:
         raise Exception("Workflow Error: Found 0 results while cataloging")
