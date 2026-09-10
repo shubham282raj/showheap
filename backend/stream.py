@@ -45,7 +45,7 @@ def verify_stream_token(token: str):
 
 def create_stream_url(metadata):
     # stream_url = f"{BASE_URL}/stream/{metadata.get("message_id")}?hash={str(metadata.get("file_hash"))[:6]}"
-    stream_url = f"{BASE_URL}/stream/{metadata.get("message_id")}?token={create_stream_token(uid="bypass", message_id=metadata.get("message_id"))}"
+    stream_url = f"{BASE_URL}/stream/{metadata.get("message_id")}?token={create_stream_token(uid="bypass", message_id=str(metadata.get("message_id")))}"
     return stream_url
 
 
