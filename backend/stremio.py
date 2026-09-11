@@ -16,7 +16,7 @@ def get_manifest():
         "version": "1.0.0",
         "name": "ShowHeap",
         "types": ["movie", "series"],
-        "resources": ["stream"],
+        "resources": ["catalog", "stream"],
         "catalogs": [
             {"type": "movie", "id": "movie", "name": "ShowHeap"},
             {"type": "series", "id": "series", "name": "ShowHeap"},
